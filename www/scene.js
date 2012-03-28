@@ -1,10 +1,3 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Holovideo Viewer</title>
-
-<script type="text/javascript" src="./glMatrix-0.9.5.min.js"></script>
-<script type="text/javascript" src="./webgl-utils.js"></script>
-
-<script type="text/javascript">
     var gl;
 	var videoElement;
     
@@ -287,16 +280,3 @@
 
         tick();
     }
-</script>
-
-
-</head>
-
-
-<body onload="webGLStart();">
-    <canvas id="lesson05-canvas" style="border: none;" width="512" height="512" ></canvas>
-	
-	<video id="holovideo" src="./videos/Video1.mov" style="display: none;" autoplay="autoplay">   
-        Your browser doesn't appear to support the HTML5 <code>&lt;video&gt;</code> element. 
-    </video>
-</body></html>
