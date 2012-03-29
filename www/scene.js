@@ -1,23 +1,5 @@
     var gl;
 	var videoElement;
-    
-	function getShaderStr(path){      
-		var XHR = new XMLHttpRequest();
-		XHR.open("GET", path, false);
-		  
-		if(XHR.overrideMimeType){
-			XHR.overrideMimeType("text/plain");
-		}	
-		  
-		try{
-			XHR.send(null);
-		}catch(e){
-			this.println('Error reading file "' + path + '"');
-		}
-		 		  
-		return XHR.responseText;
-	};
-
 	
 	function initGL(canvas) {
         try {
