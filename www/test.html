@@ -49,13 +49,18 @@
 	var container;
 	
 	var camera, scene, renderer, composer;
+	var sceneScreen, sceneScreenCamera, sceneScreenQuad;
+	
 	var holovideoFrame;
 	
-	var shaderColorConvert;
+	var shaderTextureDisplay, shaderColorConvert, shaderPhaseCalculator, shaderDepthCalculator, shaderNormalCalculator, shaderFinalRender;
+	var texturePhaseMap, textureDepthMap, textureNormalMap;
 	
 	// set the scene size
 	var WIDTH = 600,
 	    HEIGHT = 400;
+		
+	var TEXTURE_WIDTH = 512, TEXTURE_HEIGHT = 512;
 	
 	// set some camera attributes
 	var VIEW_ANGLE = 45,
@@ -73,23 +78,137 @@
 		holovideoFrame.min_filter = THREE.LinearFilter;
 		holovideoFrame.max_filter = THREE.LinearFilter;
 		holovideoFrame.needsUpdate = true;
+		
+		//	Needed to enable floating point textures
+		var gl = renderer.context;
+		if (!gl.getExtension("OES_texture_float")) {
+           throw("Requires OES_texture_float extension");
+        }
+		
+		texturePhaseMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
+		
+		textureDepthMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
+		
+		textureNormalMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat});
 	}
 	
 	function initShaders()
 	{
-		uniforms = {
+		var uniformsTextureDisplay = {
 			image: {type: "t", 
 					value: 0,
-					texture: holovideoFrame						
-					//texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
+					//texture: holovideoFrame				
+					texture: textureNormalMap
+					}
+		};
+		
+		shaderTextureDisplay = new THREE.ShaderMaterial({
+			uniforms: uniformsTextureDisplay,
+			vertexShader: loadShader('./shaders/TextureDisplay.vert'),
+			fragmentShader: loadShader('./shaders/TextureDisplay.frag')
+		});
+	
+		var uniformsColorConvert = {
+			image: {type: "t", 
+					value: 0,
+					//texture: holovideoFrame						
+					texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
 					}
 		};
 		
 		shaderColorConvert = new THREE.ShaderMaterial({
-			uniforms: uniforms,
+			uniforms: uniformsColorConvert,
 			vertexShader: loadShader('./shaders/colorChannelConvert.vert'),
 			fragmentShader: loadShader('./shaders/colorChannelConvert.frag')
 		});
+		
+		var uniformsPhaseCalculator = {
+			holovideoFrame: {type: "t", 
+							 value: 0,
+							 //texture: holovideoFrame						
+							 texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
+					},
+
+			width: {type: "f", value: 512.0},
+			depthWrite: false
+		};
+		
+		shaderPhaseCalculator = new THREE.ShaderMaterial({
+			uniforms: uniformsPhaseCalculator,
+			vertexShader: loadShader('./shaders/PhaseCalculator.vert'),
+			fragmentShader: loadShader('./shaders/PhaseCalculator.frag')
+		});
+		
+		var uniformsDepthCalculator = {
+			phaseMap: {type: "t", 
+					   value: 0,
+					   texture: texturePhaseMap	
+					},
+
+			width: {type: "f", value: 512.0},
+			depthWrite: false
+		};
+		
+		shaderDepthCalculator = new THREE.ShaderMaterial({
+			uniforms: uniformsDepthCalculator,
+			vertexShader: loadShader('./shaders/DepthCalculator.vert'),
+			fragmentShader: loadShader('./shaders/DepthCalculator.frag')
+		});
+		
+		var uniformsNormalCalculator = {
+			depthMap: {type: "t", 
+					   value: 0,
+					   texture: textureDepthMap	
+					},
+
+			width: {type: "f", value: 512.0},
+			height: {type: "f", value: 512.0},
+			depthWrite: false
+		};
+		
+		shaderNormalCalculator = new THREE.ShaderMaterial({
+			uniforms: uniformsNormalCalculator,
+			vertexShader: loadShader('./shaders/NormalCalculator.vert'),
+			fragmentShader: loadShader('./shaders/NormalCalculator.frag')
+		});
+		
+		var uniformsFinalRender = {
+			depthMap: {type: "t", 
+					   value: 0,
+					   texture: textureDepthMap	
+					},
+
+			normalMap: {type: "t", 
+					   value: 0,
+					   texture: textureNormalMap	
+					},
+				
+			holovideoFrame: {type: "t", 
+							 value: 0,
+							 //texture: holovideoFrame						
+							 texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
+					},
+				
+			depthWrite: false
+		};
+		
+		shaderFinalRender = new THREE.ShaderMaterial({
+			uniforms: uniformsFinalRender,
+			vertexShader: loadShader('./shaders/FinalRender.vert'),
+			fragmentShader: loadShader('./shaders/FinalRender.frag')
+		});
+	}
+	
+	function initSceneScreen()
+	{
+		sceneScreenCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
+		sceneScreenCamera.position.z = 1;
+	
+		sceneScreen = new THREE.Scene();
+		sceneScreenQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), shaderPhaseCalculator);
+		sceneScreenQuad.position.z = 0;
+		sceneScreen.add(sceneScreenQuad);
+		sceneScreen.add(sceneScreenCamera);
 	}
 	
 	function init()
@@ -107,6 +226,7 @@
 		// -----------------------------------------------------------------		
 		initTextures();
 		initShaders();
+		initSceneScreen();
 		
 		// -----------------------------------------------------------------
 		// Init camera and scene
@@ -115,10 +235,10 @@
 		camera.position.z = 4;
 		
 		scene = new THREE.Scene();
-		var width = 2, height = 2, segmentsWidth = 2, segmentsHeight = 2;
+		var width = 2, height = 2, segmentsWidth = 64, segmentsHeight = 64;
 		var mesh = new THREE.Mesh(
 		   new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
-		   shaderColorConvert
+		   shaderFinalRender //shaderTextureDisplay
 		);
 
 		// add the mesh to the scene
@@ -143,6 +263,24 @@
 	{
 		holovideoFrame.needsUpdate = true;
 		renderer.clear();
+		
+		// Pass 1 - Phase Calculation
+		sceneScreenQuad.material = shaderPhaseCalculator;
+		renderer.render(sceneScreen, sceneScreenCamera, texturePhaseMap, true);
+		
+		// Pass 2 - Depth Calculation
+		sceneScreenQuad.material = shaderDepthCalculator;
+		renderer.render(sceneScreen, sceneScreenCamera, textureDepthMap, true);
+		
+		// Pass 3 - Normal Calculation
+		sceneScreenQuad.material = shaderNormalCalculator;
+		renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
+		
+		// Pass 4 - Final Render
+		
+		sceneScreenQuad.material = shaderTextureDisplay;
+		//renderer.render(sceneScreen, sceneScreenCamera);
+		
 		renderer.render(scene, camera);
 	}
 </script>
