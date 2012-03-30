@@ -36,6 +36,7 @@ void main()
 	}
 	else
 	{
-		gl_FragColor = Iamb + Idiff + Ispec;
+		//gl_FragColor = Iamb + Idiff + Ispec;
+		gl_FragColor = texture2D(normalMap, fragUV);
 	}
 }

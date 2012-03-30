@@ -1,302 +1,314 @@
+<!doctype html>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Holovideo Viewer</title>
 
+<style>
+	#container {
+		background: #000;
+		width: 400px;
+		height: 300px;
+	}
+</style>
+
 <script type="text/javascript" src="./glMatrix-0.9.5.min.js"></script>
 <script type="text/javascript" src="./webgl-utils.js"></script>
-
-<script type="text/javascript">
-    var gl;
-	var videoElement;
-    
-	function getShaderStr(path){      
-		var XHR = new XMLHttpRequest();
-		XHR.open("GET", path, false);
-		  
-		if(XHR.overrideMimeType){
-			XHR.overrideMimeType("text/plain");
-		}	
-		  
-		try{
-			XHR.send(null);
-		}catch(e){
-			this.println('Error reading file "' + path + '"');
-		}
-		 		  
-		return XHR.responseText;
-	};
-
-	
-	function initGL(canvas) {
-        try {
-            gl = canvas.getContext("experimental-webgl");
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
-        } catch (e) {
-        }
-        if (!gl) {
-            alert("Could not initialise WebGL, sorry :-(");
-        }
-    }
-
-
-    function getShader2(gl, id) {
-        var shaderScript = document.getElementById(id);
-        if (!shaderScript) {
-            return null;
-        }
-
-        var str = "";
-        var k = shaderScript.firstChild;
-        while (k) {
-            if (k.nodeType == 3) {
-                str += k.textContent;
-            }
-            k = k.nextSibling;
-        }
-
-        var shader;
-        if (shaderScript.type == "x-shader/x-fragment") {
-            shader = gl.createShader(gl.FRAGMENT_SHADER);
-        } else if (shaderScript.type == "x-shader/x-vertex") {
-            shader = gl.createShader(gl.VERTEX_SHADER);
-        } else {
-            return null;
-        }
-
-        gl.shaderSource(shader, str);
-        gl.compileShader(shader);
-
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            alert(gl.getShaderInfoLog(shader));
-            return null;
-        }
-
-        return shader;
-    }
-	
-	function getShader(gl, shaderScriptType, sourceString) {	
-	str = getShaderStr(sourceString);
-	
-	var shader;
-	if (shaderScriptType == "x-shader/x-fragment") {
-		shader = gl.createShader(gl.FRAGMENT_SHADER);
-	} else if (shaderScriptType == "x-shader/x-vertex") {
-		shader = gl.createShader(gl.VERTEX_SHADER);
-	} else {
-		return null;
-	}
-
-	gl.shaderSource(shader, str);
-	gl.compileShader(shader);
-
-	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-		alert(gl.getShaderInfoLog(shader));
-		return null;
-	}
-
-	return shader;
-}
-
-
-    var shaderProgram;
-
-    function initShaders() {
-        var fragmentShader = getShader(gl, "x-shader/x-fragment", "shaders/textureDisplay.frag");
-        var vertexShader = getShader(gl, "x-shader/x-vertex", "shaders/textureDisplay.vert");
-
-        shaderProgram = gl.createProgram();
-        gl.attachShader(shaderProgram, vertexShader);
-        gl.attachShader(shaderProgram, fragmentShader);
-        gl.linkProgram(shaderProgram);
-		
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            alert("Could not initialise shaders");
-        }
-
-        gl.useProgram(shaderProgram);
-
-        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-
-        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-        gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
-
-        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-    }
-
-
-    function handleLoadedTexture(texture) {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, videoElement);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-    }
-
-
-    var neheTexture;
-
-    function initTexture() {
-        neheTexture = gl.createTexture();
-    }
-
-	function insertVideo(video) {
-		neheTexture.image = video;
-		handleLoadedTexture(neheTexture)
-	}
-	
-
-    var mvMatrix = mat4.create();
-    var mvMatrixStack = [];
-    var pMatrix = mat4.create();
-
-    function mvPushMatrix() {
-        var copy = mat4.create();
-        mat4.set(mvMatrix, copy);
-        mvMatrixStack.push(copy);
-    }
-
-    function mvPopMatrix() {
-        if (mvMatrixStack.length == 0) {
-            throw "Invalid popMatrix!";
-        }
-        mvMatrix = mvMatrixStack.pop();
-    }
-
-
-    function setMatrixUniforms() {
-        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-    }
-
-
-    function degToRad(degrees) {
-        return degrees * Math.PI / 180;
-    }
-
-    var cubeVertexPositionBuffer;
-    var cubeVertexTextureCoordBuffer;
-    var cubeVertexIndexBuffer;
-
-    function initBuffers() {
-        cubeVertexPositionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-        vertices = [
-            // Front face
-            -1.0, -1.0,  1.0,
-             1.0, -1.0,  1.0,
-             1.0,  1.0,  1.0,
-            -1.0,  1.0,  1.0,
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        cubeVertexPositionBuffer.itemSize = 3;
-        cubeVertexPositionBuffer.numItems = 4;
-
-        cubeVertexTextureCoordBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-        var textureCoords = [
-          // Front face
-          0.0, 0.0,
-          1.0, 0.0,
-          1.0, 1.0,
-          0.0, 1.0,
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
-        cubeVertexTextureCoordBuffer.itemSize = 2;
-        cubeVertexTextureCoordBuffer.numItems = 4;
-
-        cubeVertexIndexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-        var cubeVertexIndices = [
-            0, 1, 2,      0, 2, 3,    // Front face
-        ];
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
-        cubeVertexIndexBuffer.itemSize = 1;
-        cubeVertexIndexBuffer.numItems = 6;
-    }
-
-
-    var xRot = 0;
-    var yRot = 0;
-    var zRot = 0;
-
-    function drawScene() {
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-
-        mat4.identity(mvMatrix);
-
-        mat4.translate(mvMatrix, [0.0, 0.0, -5.0]);
-
-        mat4.rotate(mvMatrix, degToRad(xRot), [1, 0, 0]);
-        mat4.rotate(mvMatrix, degToRad(yRot), [0, 1, 0]);
-        mat4.rotate(mvMatrix, degToRad(zRot), [0, 0, 1]);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, neheTexture);
-        gl.uniform1i(shaderProgram.samplerUniform, 0);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-        setMatrixUniforms();
-        gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-    }
-
-
-    var lastTime = 0;
-
-    function animate() {
-        var timeNow = new Date().getTime();
-        if (lastTime != 0) {
-            var elapsed = timeNow - lastTime;
-			
-			// Do animation in here
-        }
-        lastTime = timeNow;
-    }
-
-
-    function tick() {
-		insertVideo(videoElement);
-        requestAnimFrame(tick);
-        drawScene();
-        animate();
-    }
-	
-    function webGLStart() {
-        var canvas = document.getElementById("lesson05-canvas");
-		videoElement = document.getElementById("holovideo");
-		
-        initGL(canvas);
-        initShaders();
-        initBuffers();
-        initTexture();
-
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.enable(gl.DEPTH_TEST);
-
-        tick();
-    }
-</script>
-
+<script type="text/javascript" src="./utils.js"></script>
+<script type="text/javascript" src="./scene.js"></script>
+<script type="text/javascript" src="./Libraries/threeJS/Three.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 
 </head>
 
-
-<body onload="webGLStart();">
-    <canvas id="lesson05-canvas" style="border: none;" width="512" height="512" ></canvas>
-	
-	<video id="holovideo" src="./videos/Video1.mov" style="display: none;" autoplay="autoplay">   
+<body>
+	<video id="holovideo" autoplay loop style="display:none">   
+		<source src="./videos/test.mp4" type='video/mp4;'>
         Your browser doesn't appear to support the HTML5 <code>&lt;video&gt;</code> element. 
     </video>
+
+	<div id="container">
+
+	</div>
+	
+	<script type="text/javascript">
+
+	function loadShader(url) 
+	{
+		var shaderSource = '';
+		
+		$.ajax(
+		{
+			url: url,
+			dataType: 'text',
+			success: function(results){shaderSource = results;},
+			async:   false
+		});
+		
+		return shaderSource;
+	}
+	
+	var container;
+	
+	var camera, scene, renderer, composer;
+	var sceneScreen, sceneScreenCamera, sceneScreenQuad;
+	
+	var holovideoFrame;
+	
+	var shaderTextureDisplay, shaderColorConvert, shaderPhaseCalculator, shaderDepthCalculator, shaderNormalCalculator, shaderFinalRender;
+	var texturePhaseMap, textureDepthMap, textureNormalMap;
+	
+	// set the scene size
+	var WIDTH = 600,
+	    HEIGHT = 400;
+		
+	var mouseX = 0, mouseY = 0;
+	var windowHalfX = window.innerWidth / 2;
+	var windowHalfY = window.innerHeight / 2;
+		
+	var TEXTURE_WIDTH = 512, TEXTURE_HEIGHT = 512;
+	
+	// set some camera attributes
+	var VIEW_ANGLE = 45,
+	    ASPECT = WIDTH / HEIGHT,
+	    NEAR = 0.1,
+	    FAR = 10000;
+	
+	init();
+	animate();
+	
+	function initTextures()
+	{
+		var videoElement = $('#holovideo')[0];
+		holovideoFrame = new THREE.Texture(videoElement);
+		holovideoFrame.min_filter = THREE.LinearFilter;
+		holovideoFrame.max_filter = THREE.LinearFilter;
+		holovideoFrame.needsUpdate = true;
+		
+		//	Needed to enable floating point textures
+		var gl = renderer.context;
+		if (!gl.getExtension("OES_texture_float")) {
+           throw("Requires OES_texture_float extension");
+        }
+		
+		texturePhaseMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
+		
+		textureDepthMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
+		
+		textureNormalMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat});
+	}
+	
+	function initShaders()
+	{
+		var uniformsTextureDisplay = {
+			image: {type: "t", 
+					value: 0,
+					//texture: holovideoFrame				
+					texture: textureNormalMap
+					}
+		};
+		
+		shaderTextureDisplay = new THREE.ShaderMaterial({
+			uniforms: uniformsTextureDisplay,
+			vertexShader: loadShader('./shaders/TextureDisplay.vert'),
+			fragmentShader: loadShader('./shaders/TextureDisplay.frag')
+		});
+	
+		var uniformsColorConvert = {
+			image: {type: "t", 
+					value: 0,
+					//texture: holovideoFrame						
+					texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
+					}
+		};
+		
+		shaderColorConvert = new THREE.ShaderMaterial({
+			uniforms: uniformsColorConvert,
+			vertexShader: loadShader('./shaders/colorChannelConvert.vert'),
+			fragmentShader: loadShader('./shaders/colorChannelConvert.frag')
+		});
+		
+		var uniformsPhaseCalculator = {
+			holovideoFrame: {type: "t", 
+							 value: 0,
+							 //texture: holovideoFrame						
+							 texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
+					},
+
+			width: {type: "f", value: 512.0},
+			depthWrite: false
+		};
+		
+		shaderPhaseCalculator = new THREE.ShaderMaterial({
+			uniforms: uniformsPhaseCalculator,
+			vertexShader: loadShader('./shaders/PhaseCalculator.vert'),
+			fragmentShader: loadShader('./shaders/PhaseCalculator.frag')
+		});
+		
+		var uniformsDepthCalculator = {
+			phaseMap: {type: "t", 
+					   value: 0,
+					   texture: texturePhaseMap	
+					},
+
+			width: {type: "f", value: 512.0},
+			depthWrite: false
+		};
+		
+		shaderDepthCalculator = new THREE.ShaderMaterial({
+			uniforms: uniformsDepthCalculator,
+			vertexShader: loadShader('./shaders/DepthCalculator.vert'),
+			fragmentShader: loadShader('./shaders/DepthCalculator.frag')
+		});
+		
+		var uniformsNormalCalculator = {
+			depthMap: {type: "t", 
+					   value: 0,
+					   texture: textureDepthMap	
+					},
+
+			width: {type: "f", value: 512.0},
+			height: {type: "f", value: 512.0},
+			depthWrite: false
+		};
+		
+		shaderNormalCalculator = new THREE.ShaderMaterial({
+			uniforms: uniformsNormalCalculator,
+			vertexShader: loadShader('./shaders/NormalCalculator.vert'),
+			fragmentShader: loadShader('./shaders/NormalCalculator.frag')
+		});
+		
+		var uniformsFinalRender = {
+			depthMap: {type: "t", 
+					   value: 0,
+					   texture: textureDepthMap	
+					},
+
+			normalMap: {type: "t", 
+					   value: 1,
+					   texture: textureNormalMap	
+					},
+				
+			holovideoFrame: {type: "t", 
+							 value: 2,
+							 //texture: holovideoFrame						
+							 texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
+					},
+				
+			depthWrite: false
+		};
+		
+		shaderFinalRender = new THREE.ShaderMaterial({
+			uniforms: uniformsFinalRender,
+			vertexShader: loadShader('./shaders/FinalRender.vert'),
+			fragmentShader: loadShader('./shaders/FinalRender.frag')
+		});
+	}
+	
+	function initSceneScreen()
+	{
+		sceneScreenCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
+		sceneScreenCamera.position.z = 1;
+	
+		sceneScreen = new THREE.Scene();
+		sceneScreenQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), shaderPhaseCalculator);
+		sceneScreenQuad.position.z = 0;
+		sceneScreen.add(sceneScreenQuad);
+		sceneScreen.add(sceneScreenCamera);
+	}
+	
+	function init()
+	{
+		// -----------------------------------------------------------------
+		// Init renderer
+		// -----------------------------------------------------------------
+		$container = $('#container');
+		renderer = new THREE.WebGLRenderer();
+		$container.append(renderer.domElement);
+		renderer.autoClear = false;
+		
+		//	Mouse listener
+		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+		// -----------------------------------------------------------------
+		// Init textures and shaders
+		// -----------------------------------------------------------------		
+		initTextures();
+		initShaders();
+		initSceneScreen();
+		
+		// -----------------------------------------------------------------
+		// Init camera and scene
+		// -----------------------------------------------------------------	
+		camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+		camera.position.z = 4;
+		
+		scene = new THREE.Scene();
+		var width = 2, height = 2, segmentsWidth = 64, segmentsHeight = 64;
+		var mesh = new THREE.Mesh(
+		   new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
+		   shaderFinalRender //shaderTextureDisplay
+		);
+
+		// add the mesh to the scene
+		scene.add(mesh);
+		scene.add(camera);
+		
+		// -----------------------------------------------------------------
+		// Start the renderer
+		// -----------------------------------------------------------------
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setClearColorHex(0x000000, 1.0);		
+	}
+	
+	function onDocumentMouseMove(event) {
+
+		mouseX = ( event.clientX - windowHalfX ) * 0.01;
+		mouseY = ( event.clientY - windowHalfY ) * 0.01;
+
+	}
+	
+	function animate() 
+	{
+		requestAnimationFrame( animate );
+	
+		render();
+	}	
+	
+	function render() 
+	{
+		// Adjust camera
+		camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+		camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+		
+		camera.position.x = camera.position.x > 5.0 ? 5.0 : camera.position.x;
+		camera.position.x = camera.position.x < -5.0 ? -5.0 : camera.position.x;
+		
+		camera.position.y = camera.position.y > 3.0 ? 3.0 : camera.position.y;
+		camera.position.y = camera.position.y < -3.0 ? -3.0 : camera.position.y;
+		
+		camera.lookAt( scene.position );
+	
+		holovideoFrame.needsUpdate = true;
+		renderer.clear();
+		
+		// Pass 1 - Phase Calculation
+		sceneScreenQuad.material = shaderPhaseCalculator;
+		renderer.render(sceneScreen, sceneScreenCamera, texturePhaseMap, true);
+		
+		// Pass 2 - Depth Calculation
+		sceneScreenQuad.material = shaderDepthCalculator;
+		renderer.render(sceneScreen, sceneScreenCamera, textureDepthMap, true);
+		
+		// Pass 3 - Normal Calculation
+		sceneScreenQuad.material = shaderNormalCalculator;
+		renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
+		
+		// Pass 4 - Final Render
+		
+		sceneScreenQuad.material = shaderTextureDisplay;
+		//renderer.render(sceneScreen, sceneScreenCamera);
+		
+		renderer.render(scene, camera);
+	}
+</script>
+	
 </body></html>

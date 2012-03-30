@@ -60,6 +60,10 @@
 	var WIDTH = 600,
 	    HEIGHT = 400;
 		
+	var mouseX = 0, mouseY = 0;
+	var windowHalfX = window.innerWidth / 2;
+	var windowHalfY = window.innerHeight / 2;
+		
 	var TEXTURE_WIDTH = 512, TEXTURE_HEIGHT = 512;
 	
 	// set some camera attributes
@@ -179,12 +183,12 @@
 					},
 
 			normalMap: {type: "t", 
-					   value: 0,
+					   value: 1,
 					   texture: textureNormalMap	
 					},
 				
 			holovideoFrame: {type: "t", 
-							 value: 0,
+							 value: 2,
 							 //texture: holovideoFrame						
 							 texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
 					},
@@ -220,6 +224,9 @@
 		renderer = new THREE.WebGLRenderer();
 		$container.append(renderer.domElement);
 		renderer.autoClear = false;
+		
+		//	Mouse listener
+		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
 		// -----------------------------------------------------------------
 		// Init textures and shaders
@@ -248,8 +255,15 @@
 		// -----------------------------------------------------------------
 		// Start the renderer
 		// -----------------------------------------------------------------
-		renderer.setSize(WIDTH, HEIGHT);
+		renderer.setSize(window.innerWidth, window.innerHeight);
 		renderer.setClearColorHex(0x000000, 1.0);		
+	}
+	
+	function onDocumentMouseMove(event) {
+
+		mouseX = ( event.clientX - windowHalfX ) * 0.01;
+		mouseY = ( event.clientY - windowHalfY ) * 0.01;
+
 	}
 	
 	function animate() 
@@ -261,6 +275,18 @@
 	
 	function render() 
 	{
+		// Adjust camera
+		camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+		camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+		
+		camera.position.x = camera.position.x > 5.0 ? 5.0 : camera.position.x;
+		camera.position.x = camera.position.x < -5.0 ? -5.0 : camera.position.x;
+		
+		camera.position.y = camera.position.y > 3.0 ? 3.0 : camera.position.y;
+		camera.position.y = camera.position.y < -3.0 ? -3.0 : camera.position.y;
+		
+		camera.lookAt( scene.position );
+	
 		holovideoFrame.needsUpdate = true;
 		renderer.clear();
 		
