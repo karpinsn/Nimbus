@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Holovideo Viewer</title>
+<title>Nimbus</title>
 
 <style>
 	#container {
@@ -102,7 +102,8 @@
 			image: {type: "t", 
 					value: 0,
 					//texture: holovideoFrame				
-					texture: textureNormalMap
+					//texture: textureNormalMap
+					texture: THREE.ImageUtils.loadTexture('./images/MegaFrame.png')
 					}
 		};
 		
@@ -130,7 +131,8 @@
 			holovideoFrame: {type: "t", 
 							 value: 0,
 							 //texture: holovideoFrame						
-							 texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
+							 texture: THREE.ImageUtils.loadTexture('./images/Amy.png') 
+							 //texture: THREE.ImageUtils.loadTexture('./images/out.png') 
 					},
 
 			width: {type: "f", value: 512.0},
@@ -190,7 +192,7 @@
 			holovideoFrame: {type: "t", 
 							 value: 2,
 							 //texture: holovideoFrame						
-							 texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
+							 texture: THREE.ImageUtils.loadTexture('./images/0000.png') 
 					},
 				
 			depthWrite: false
@@ -225,9 +227,10 @@
 		$container.append(renderer.domElement);
 		renderer.autoClear = false;
 		
-		//	Mouse listener
+		//	Events
 		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-
+		window.addEventListener( 'resize', onWindowResize, false );
+		
 		// -----------------------------------------------------------------
 		// Init textures and shaders
 		// -----------------------------------------------------------------		
@@ -245,7 +248,8 @@
 		var width = 2, height = 2, segmentsWidth = 64, segmentsHeight = 64;
 		var mesh = new THREE.Mesh(
 		   new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
-		   shaderFinalRender //shaderTextureDisplay
+		   shaderFinalRender 
+		   //shaderTextureDisplay
 		);
 
 		// add the mesh to the scene
@@ -257,6 +261,14 @@
 		// -----------------------------------------------------------------
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		renderer.setClearColorHex(0x000000, 1.0);		
+	}
+	
+	function onWindowResize( event ) 
+	{
+		renderer.setSize( window.innerWidth, window.innerHeight );
+
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
 	}
 	
 	function onDocumentMouseMove(event) {
