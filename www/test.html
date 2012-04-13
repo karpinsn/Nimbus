@@ -10,21 +10,12 @@
 	}
 </style>
 
-<script type="text/javascript" src="./glMatrix-0.9.5.min.js"></script>
-<script type="text/javascript" src="./webgl-utils.js"></script>
-<script type="text/javascript" src="./utils.js"></script>
-<script type="text/javascript" src="./scene.js"></script>
 <script type="text/javascript" src="./Libraries/threeJS/Three.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 
 </head>
 
 <body>
-	<video id="holovideo" autoplay loop style="display:none">   
-		<source src="./videos/test.mp4" type='video/mp4;'>
-        Your browser doesn't appear to support the HTML5 <code>&lt;video&gt;</code> element. 
-    </video>
-
 	<div id="container">
 
 	</div>
@@ -51,10 +42,8 @@
 	var camera, scene, renderer, composer;
 	var sceneScreen, sceneScreenCamera, sceneScreenQuad;
 	
-	var holovideoFrame;
-	
-	var shaderTextureDisplay, shaderColorConvert, shaderPhaseCalculator, shaderDepthCalculator, shaderNormalCalculator, shaderFinalRender;
-	var texturePhaseMap, textureDepthMap, textureNormalMap;
+	var shaderTextureDisplay, shaderTimeClipper, shaderPhaseCalculator, shaderDepthCalculator, shaderNormalCalculator, shaderFinalRender;
+	var textureHoloframe, texturePhaseMap, textureDepthMap, textureNormalMap;
 	
 	// set the scene size
 	var WIDTH = 600,
@@ -76,23 +65,16 @@
 	animate();
 	
 	function initTextures()
-	{
-		var videoElement = $('#holovideo')[0];
-		holovideoFrame = new THREE.Texture(videoElement);
-		holovideoFrame.min_filter = THREE.LinearFilter;
-		holovideoFrame.max_filter = THREE.LinearFilter;
-		holovideoFrame.needsUpdate = true;
-		
+	{	
 		//	Needed to enable floating point textures
 		var gl = renderer.context;
 		if (!gl.getExtension("OES_texture_float")) {
            throw("Requires OES_texture_float extension");
         }
 		
+		textureHoloframe = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat});
 		texturePhaseMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
-		
 		textureDepthMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
-		
 		textureNormalMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat});
 	}
 	
@@ -102,8 +84,8 @@
 			image: {type: "t", 
 					value: 0,
 					//texture: holovideoFrame				
-					//texture: textureNormalMap
-					texture: THREE.ImageUtils.loadTexture('./images/MegaFrame.png')
+					texture: textureHoloframe
+					//texture: THREE.ImageUtils.loadTexture('./images/MegaFrame.png')
 					}
 		};
 		
@@ -112,19 +94,22 @@
 			vertexShader: loadShader('./shaders/TextureDisplay.vert'),
 			fragmentShader: loadShader('./shaders/TextureDisplay.frag')
 		});
-	
-		var uniformsColorConvert = {
-			image: {type: "t", 
-					value: 0,
-					//texture: holovideoFrame						
-					texture: THREE.ImageUtils.loadTexture('./images/circleF6B4.png') 
-					}
+		
+		var uniformsTimeClipper = {
+			textureOverTime: {type: "t", 
+							 value: 0,		
+							 texture: THREE.ImageUtils.loadTexture('./images/MegaFrame.png')
+					},
+
+			cols: {type: "f", value: 8.0},
+			rows: {type: "f", value: 8.0},
+			depthWrite: false
 		};
 		
-		shaderColorConvert = new THREE.ShaderMaterial({
-			uniforms: uniformsColorConvert,
-			vertexShader: loadShader('./shaders/colorChannelConvert.vert'),
-			fragmentShader: loadShader('./shaders/colorChannelConvert.frag')
+		shaderTimeClipper = new THREE.ShaderMaterial({
+			uniforms: uniformsTimeClipper,
+			vertexShader: loadShader('./shaders/TimeClipper.vert'),
+			fragmentShader: loadShader('./shaders/TimeClipper.frag')
 		});
 		
 		var uniformsPhaseCalculator = {
@@ -299,8 +284,11 @@
 		
 		camera.lookAt( scene.position );
 	
-		holovideoFrame.needsUpdate = true;
 		renderer.clear();
+		
+		// Pass 0 - Time Clipping
+		sceneScreenQuad.material = shaderTimeClipper;
+		renderer.render(sceneScreen, sceneScreenCamera, textureHoloframe, true);
 		
 		// Pass 1 - Phase Calculation
 		sceneScreenQuad.material = shaderPhaseCalculator;
@@ -317,9 +305,9 @@
 		// Pass 4 - Final Render
 		
 		sceneScreenQuad.material = shaderTextureDisplay;
-		//renderer.render(sceneScreen, sceneScreenCamera);
+		renderer.render(sceneScreen, sceneScreenCamera);
 		
-		renderer.render(scene, camera);
+		//renderer.render(scene, camera);
 	}
 </script>
 	

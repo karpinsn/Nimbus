@@ -1,0 +1,143 @@
+<!doctype html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Nimbus</title>
+
+<style>
+	#NimbusContainer {
+		background: #000;
+		width: 400px;
+		height: 300px;
+	}
+</style>
+
+<script type="text/javascript" src="./Libraries/threeJS/Three.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+	<div id="NimbusContainer">
+
+	</div>
+	
+	<script type="text/javascript">
+
+	function loadShader(url) 
+	{
+		var shaderSource = '';
+		
+		$.ajax(
+		{
+			url: url,
+			dataType: 'text',
+			success: function(results){shaderSource = results;},
+			async:   false
+		});
+		
+		return shaderSource;
+	}
+	
+	var container;
+	
+	var camera, scene, renderer, composer;
+		
+	// set the scene size
+	var WIDTH = 600,
+	    HEIGHT = 400;
+		
+	var mouseX = 0, mouseY = 0;
+	var windowHalfX = window.innerWidth / 2;
+	var windowHalfY = window.innerHeight / 2;
+		
+	var TEXTURE_WIDTH = 512, TEXTURE_HEIGHT = 512;
+	
+	// set some camera attributes
+	var VIEW_ANGLE = 45,
+	    ASPECT = WIDTH / HEIGHT,
+	    NEAR = 0.1,
+	    FAR = 10000;
+	
+	init();
+	animate();
+	
+	function init()
+	{
+		// -----------------------------------------------------------------
+		// Init renderer
+		// -----------------------------------------------------------------
+		$container = $('#NimbusContainer');
+		renderer = new THREE.WebGLRenderer();
+		$container.append(renderer.domElement);
+		renderer.autoClear = false;
+		
+		//	Events
+		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+		window.addEventListener( 'resize', onWindowResize, false );
+		
+		// -----------------------------------------------------------------
+		// Init camera and scene
+		// -----------------------------------------------------------------	
+		camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+		camera.position.z = 4;
+		
+		scene = new THREE.Scene();
+		var material = new THREE.MeshNormalMaterial({shading: THREE.SmoothShading});
+		var width = 2, height = 2, depth = 2, segmentsWidth = 64, segmentsHeight = 64;
+		var mesh = new THREE.Mesh(
+		   new THREE.CubeGeometry(width, height, depth), material
+		);
+
+		// add the mesh to the scene
+		scene.add(mesh);
+		scene.add(camera);
+		
+		// -----------------------------------------------------------------
+		// Start the renderer
+		// -----------------------------------------------------------------
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setClearColorHex(0x000000, 1.0);		
+	}
+	
+	function onWindowResize( event ) 
+	{
+		renderer.setSize( window.innerWidth, window.innerHeight );
+
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+	}
+	
+	function onDocumentMouseMove(event) {
+
+		mouseX = ( event.clientX - windowHalfX ) * 0.01;
+		mouseY = ( event.clientY - windowHalfY ) * 0.01;
+
+	}
+	
+	function animate() 
+	{
+		requestAnimationFrame( animate );
+	
+		render();
+	}	
+	
+	function render() 
+	{
+		// Adjust camera
+		camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+		camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+		
+		camera.position.x = camera.position.x > 5.0 ? 5.0 : camera.position.x;
+		camera.position.x = camera.position.x < -5.0 ? -5.0 : camera.position.x;
+		
+		camera.position.y = camera.position.y > 3.0 ? 3.0 : camera.position.y;
+		camera.position.y = camera.position.y < -3.0 ? -3.0 : camera.position.y;
+		
+		camera.lookAt( scene.position );
+	
+		renderer.clear();
+		
+		renderer.render(scene, camera);
+	}
+</script>
+	
+</body></html>
