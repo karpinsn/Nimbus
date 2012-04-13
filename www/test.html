@@ -101,8 +101,10 @@
 							 texture: THREE.ImageUtils.loadTexture('./images/MegaFrame.png')
 					},
 
-			cols: {type: "f", value: 8.0},
-			rows: {type: "f", value: 8.0},
+			deltaTime: 			{type: "f", value: 0.2},
+			framesPerSecond: 	{type: "f", value: 30.0},
+			cols: 				{type: "f", value: 8.0},
+			rows: 				{type: "f", value: 8.0},
 			depthWrite: false
 		};
 		
@@ -115,8 +117,8 @@
 		var uniformsPhaseCalculator = {
 			holovideoFrame: {type: "t", 
 							 value: 0,
-							 //texture: holovideoFrame						
-							 texture: THREE.ImageUtils.loadTexture('./images/Amy.png') 
+							 texture: textureHoloframe						
+							 //texture: THREE.ImageUtils.loadTexture('./images/Amy.png') 
 							 //texture: THREE.ImageUtils.loadTexture('./images/out.png') 
 					},
 
@@ -241,6 +243,8 @@
 		scene.add(mesh);
 		scene.add(camera);
 		
+		startTime = new Date().getTime();
+		
 		// -----------------------------------------------------------------
 		// Start the renderer
 		// -----------------------------------------------------------------
@@ -270,6 +274,8 @@
 		render();
 	}	
 	
+	var startTime;
+	
 	function render() 
 	{
 		// Adjust camera
@@ -285,6 +291,8 @@
 		camera.lookAt( scene.position );
 	
 		renderer.clear();
+		
+		shaderTimeClipper.uniforms.deltaTime.value = new Date().getTime() - startTime;
 		
 		// Pass 0 - Time Clipping
 		sceneScreenQuad.material = shaderTimeClipper;
@@ -305,9 +313,9 @@
 		// Pass 4 - Final Render
 		
 		sceneScreenQuad.material = shaderTextureDisplay;
-		renderer.render(sceneScreen, sceneScreenCamera);
+		//renderer.render(sceneScreen, sceneScreenCamera);
 		
-		//renderer.render(scene, camera);
+		renderer.render(scene, camera);
 	}
 </script>
 	
