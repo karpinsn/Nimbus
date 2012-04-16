@@ -3,10 +3,19 @@
 <title>Nimbus</title>
 
 <style>
+	body {
+		color: #ffffff;
+		font-family:Monospace;
+		font-size:13px;
+		text-align:center;
+		font-weight: bold;
+		background-color: #000000;
+		margin: 0px;
+		overflow: hidden;
+	}
+
 	#container {
 		background: #000;
-		width: 400px;
-		height: 300px;
 	}
 </style>
 
@@ -54,10 +63,6 @@
 	
 	var shaderTextureDisplay, shaderTimeClipper, shaderPhaseCalculator, shaderDepthCalculator, shaderNormalCalculator, shaderFinalRender;
 	var textureHoloframe, texturePhaseMap, textureDepthMap, textureNormalMap;
-	
-	// set the scene size
-	var WIDTH = 600,
-	    HEIGHT = 400;
 		
 	var mouseX = 0, mouseY = 0;
 	var windowHalfX = window.innerWidth / 2;
@@ -67,8 +72,8 @@
 	
 	// set some camera attributes
 	var VIEW_ANGLE = 45,
-	    ASPECT = WIDTH / HEIGHT,
-	    NEAR = 0.1,
+	    ASPECT = window.innerWidth / window.innerHeight,
+	    NEAR = 1,
 	    FAR = 10000;
 	
 	init();
@@ -93,7 +98,7 @@
 		var uniformsTextureDisplay = {
 			image: {type: "t", 
 					value: 0,
-					//texture: holovideoFrame				
+					//texture: textureNormalMap
 					texture: textureHoloframe
 					//texture: THREE.ImageUtils.loadTexture('./images/MegaFrame.png')
 					}
@@ -211,8 +216,12 @@
 		sceneScreenCamera.position.z = 1;
 	
 		sceneScreen = new THREE.Scene();
-		sceneScreenQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), shaderPhaseCalculator);
-		sceneScreenQuad.position.z = 0;
+		sceneScreenPlane = new THREE.PlaneGeometry(2, 2, 1, 1);
+		sceneScreenQuad = new THREE.Mesh(sceneScreenPlane, shaderPhaseCalculator);
+		sceneScreenQuad.doubleSided = true;
+		sceneScreenQuad.scale.y = -1;
+		
+		
 		sceneScreen.add(sceneScreenQuad);
 		sceneScreen.add(sceneScreenCamera);
 	}
@@ -224,8 +233,10 @@
 		// -----------------------------------------------------------------
 		$container = $('#container');
 		renderer = new THREE.WebGLRenderer();
-		$container.append(renderer.domElement);
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setClearColorHex(0x000000, 1.0);	
 		renderer.autoClear = false;
+		$container.append(renderer.domElement);
 		
 		//	Events
 		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
@@ -245,7 +256,7 @@
 		camera.position.z = 4;
 		
 		scene = new THREE.Scene();
-		var width = 2, height = 2, segmentsWidth = 64, segmentsHeight = 64;
+		var width = 2, height = 2, segmentsWidth = 256, segmentsHeight = 256;
 		var mesh = new THREE.Mesh(
 		   new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
 		   shaderFinalRender 
@@ -256,13 +267,7 @@
 		scene.add(mesh);
 		scene.add(camera);
 		
-		startTime = new Date().getTime();
-		
-		// -----------------------------------------------------------------
-		// Start the renderer
-		// -----------------------------------------------------------------
-		renderer.setSize(window.innerWidth, window.innerHeight);
-		renderer.setClearColorHex(0x000000, 1.0);		
+		startTime = new Date().getTime();	
 	}
 	
 	function onWindowResize( event ) 
@@ -302,6 +307,7 @@
 		camera.position.y = camera.position.y < -3.0 ? -3.0 : camera.position.y;
 		
 		camera.lookAt( scene.position );
+		//camera.up.set(0,-1,0);
 	
 		renderer.clear();
 		

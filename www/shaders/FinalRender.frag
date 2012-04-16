@@ -5,7 +5,6 @@ varying mat3 fragNormalMatrix;
 varying vec4 fragVertex;
 
 varying vec2 fragUV;
-varying vec2 fragUVFlipped;
 
 void main()
 {
@@ -39,7 +38,7 @@ void main()
 	else
 	{
 		//gl_FragColor = Iamb + Idiff + Ispec;
-		gl_FragColor = texture2D(normalMap, fragUVFlipped);
+		gl_FragColor = texture2D(normalMap, fragUV);
 		//gl_FragColor = vec4(fragUV.x, fragUV.y, 0.0, 1.0);
 	}
 }
