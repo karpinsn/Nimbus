@@ -37,6 +37,16 @@
 		return shaderSource;
 	}
 	
+	function getUrlVars() 
+	{
+		var vars = {};
+		var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+			vars[key] = value;
+		});
+		return vars;
+	}
+
+	
 	var container;
 	
 	var camera, scene, renderer, composer;
@@ -95,10 +105,13 @@
 			fragmentShader: loadShader('./shaders/TextureDisplay.frag')
 		});
 		
+		//	'./images/MegaFrame.png'
+		var data = getUrlVars()["data"];
+		
 		var uniformsTimeClipper = {
 			textureOverTime: {type: "t", 
 							 value: 0,		
-							 texture: THREE.ImageUtils.loadTexture('./images/MegaFrame.png')
+							 texture: THREE.ImageUtils.loadTexture(data)
 					},
 
 			deltaTime: 			{type: "f", value: 0.2},
