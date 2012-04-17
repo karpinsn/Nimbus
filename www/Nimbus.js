@@ -21,12 +21,14 @@ var VIEW_ANGLE = 45,
 	NEAR = 1,
 	FAR = 10000;
 	
-var loadingContainer, loadingIndicatorDiv, loadingIndicator;
+var loadingIndicatorDiv, loadingIndicator;
+
+var dataLoaded = false;
+var renderInit = false;
 
 function showLoading()
 {
 	loader = {
-
 		width: 100,
 		height: 50,
 		padding: 10,
@@ -46,29 +48,30 @@ function showLoading()
 		},
 
 		path: [
-		
 			['arc', 10, 10, 10, -270, -90],
 			['bezier', 10, 0, 40, 20, 20, 0, 30, 20],
 			['arc', 40, 10, 10, 90, -90],
 			['bezier', 40, 0, 10, 20, 30, 0, 20, 20]
 		]
 	};
-	
-	loadingContainer = document.getElementById('NimbusLoadingDialog');
-	loadingIndicatorDiv = document.createElement('div');
-	loadingIndicatorDiv.className = 'l';
-	loadingContainer.style.display = "block";
-
 	loadingIndicator = new Sonic(loader);
+	
+	//	Make the dialog visible
+	var loadingContainer = document.getElementById('NimbusLoadingDialog');
+	loadingContainer.style.display = "block";
+	
+	loadingIndicatorDiv = document.getElementById('NimbusLoaderIndicator');
 
+	
 	loadingIndicatorDiv.appendChild(loadingIndicator.canvas);
-	loadingContainer.appendChild(loadingIndicatorDiv);
 
 	loadingIndicator.play();
 }
 
 function hideLoading()
 {
+	//	Hide the indicator
+	var loadingContainer = document.getElementById('NimbusLoadingDialog');
 	loadingContainer.style.display = "none";
 	loadingIndicator.stop();
 }
@@ -108,7 +111,7 @@ function initShaders()
 	var uniformsTimeClipper = {
 		textureOverTime: {type: "t", 
 						 value: 0,		
-						 texture: THREE.ImageUtils.loadTexture(data, THREE.UVMapping)
+						 texture: THREE.ImageUtils.loadTexture(data, THREE.UVMapping, function(){dataLoaded = true; NimbusInitComplete();})
 				},
 
 		deltaTime: 			{type: "f", value: 0.2},
@@ -222,12 +225,12 @@ function NimbusInit()
 	// -----------------------------------------------------------------
 	// Init renderer
 	// -----------------------------------------------------------------
-	$container = $('#NimbusContext');
+	container = $('#NimbusContext');
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	renderer.setClearColorHex(0x000000, 1.0);	
 	renderer.autoClear = false;
-	$container.append(renderer.domElement);
+	container.append(renderer.domElement);
 	
 	// -----------------------------------------------------------------
 	// Init stats calculator
@@ -236,7 +239,7 @@ function NimbusInit()
 	stats.domElement.style.position = 'absolute';
 	stats.domElement.style.bottom = '0px';
 	stats.domElement.style.right = '0px';
-	$container.append( stats.domElement );
+	container.append( stats.domElement );
 	
 	//	Events
 	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
@@ -268,11 +271,16 @@ function NimbusInit()
 	
 	startTime = new Date().getTime();	
 	
-	hideLoading();
+	renderInit = true;
+	NimbusInitComplete();
 }
 
 function NimbusInitComplete()
 {
+	if(dataLoaded && renderInit)
+	{
+		hideLoading();
+	}
 }
 
 function onWindowResize( event ) 
