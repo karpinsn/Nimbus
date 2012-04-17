@@ -20,7 +20,59 @@ var VIEW_ANGLE = 45,
 	ASPECT = window.innerWidth / window.innerHeight,
 	NEAR = 1,
 	FAR = 10000;
+	
+var loadingContainer, loadingIndicatorDiv, loadingIndicator;
 
+function showLoading()
+{
+	loader = {
+
+		width: 100,
+		height: 50,
+		padding: 10,
+
+		stepsPerFrame: 2,
+		trailLength: 1,
+		pointDistance: .03,
+
+		strokeColor: '#FF7B24',
+		
+		step: 'fader',
+
+		multiplier: 2,
+
+		setup: function() {
+			this._.lineWidth = 5;
+		},
+
+		path: [
+		
+			['arc', 10, 10, 10, -270, -90],
+			['bezier', 10, 0, 40, 20, 20, 0, 30, 20],
+			['arc', 40, 10, 10, 90, -90],
+			['bezier', 40, 0, 10, 20, 30, 0, 20, 20]
+		]
+	};
+	
+	loadingContainer = document.getElementById('NimbusLoadingDialog');
+	loadingIndicatorDiv = document.createElement('div');
+	loadingIndicatorDiv.className = 'l';
+	loadingContainer.style.display = "block";
+
+	loadingIndicator = new Sonic(loader);
+
+	loadingIndicatorDiv.appendChild(loadingIndicator.canvas);
+	loadingContainer.appendChild(loadingIndicatorDiv);
+
+	loadingIndicator.play();
+}
+
+function hideLoading()
+{
+	loadingContainer.style.display = "none";
+	loadingIndicator.stop();
+}
+	
 function initTextures()
 {	
 	//	Needed to enable floating point textures
@@ -56,7 +108,7 @@ function initShaders()
 	var uniformsTimeClipper = {
 		textureOverTime: {type: "t", 
 						 value: 0,		
-						 texture: THREE.ImageUtils.loadTexture(data)
+						 texture: THREE.ImageUtils.loadTexture(data, THREE.UVMapping)
 				},
 
 		deltaTime: 			{type: "f", value: 0.2},
@@ -165,6 +217,8 @@ function initSceneScreen()
 
 function NimbusInit()
 {
+	showLoading();
+
 	// -----------------------------------------------------------------
 	// Init renderer
 	// -----------------------------------------------------------------
@@ -213,6 +267,12 @@ function NimbusInit()
 	scene.add(camera);
 	
 	startTime = new Date().getTime();	
+	
+	hideLoading();
+}
+
+function NimbusInitComplete()
+{
 }
 
 function onWindowResize( event ) 
