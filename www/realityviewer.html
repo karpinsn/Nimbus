@@ -1,0 +1,222 @@
+<!doctype html>
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!-- Consider adding an manifest.appcache: h5bp.com/d/Offline -->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <!-- Use the .htaccess and remove these lines to avoid edge case issues.
+       More info: h5bp.com/b/378 -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>Autodesk Reality Capture : View Results</title>
+  <meta name="description" content="Autodesk Reality Capture">
+  <meta name="author" content="Autodesk, Inc">
+
+  <!-- Mobile viewport optimized: j.mp/bplateviewport -->
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory: mathiasbynens.be/notes/touch-icons -->
+
+  <!-- CSS: implied media=all -->
+  <!-- CSS concatenated and minified via ant build script-->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/reality.css">
+  <!-- end CSS-->
+
+  <!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
+
+  <!-- All JavaScript at the bottom, except for Modernizr / Respond.
+       Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries
+       For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
+  <script src="javascript/modernizr.js"></script>
+</head>
+
+<body>
+<div id="full-height">
+<div id="dna-bg"></div>
+<div id="container" class="container">
+	
+	<header>
+		<div id="logo" class="container">
+			<img src="images/logo-autodesk.gif" />
+		</div>
+		<div id="product-name" class="container">
+			<h1>Reality Capture</h1>
+		</div>
+	</header>
+	
+	<div id="main" role="main" class="clearfix">
+		
+		<div class="results-text">
+			<h2>Results of Your Reality Capture Session</h2>
+			<p>The box below shows the representation of your face captured by Autodesk Reality Capture technology
+			at the GET Conference. Move the mouse to rotate the 3D object.</p>
+		</div>
+
+		<div id="NimbusContainer" class="reality-capture-viewer">
+
+	</div>
+	
+
+	</div>
+
+</div> <!--! end of #container -->
+</div>
+<footer>
+	<div class="container">
+		<div class="row">
+		<div id="autodesk" class="sponsor one-third column"><p>Autodesk</p></div>
+		<div id="hcivrac" class="sponsor one-third column"><p>Reality Capture</p></div>
+		<div id="isu" class="sponsor one-third column omega"><p>Iowa State University</p></div>
+		</div>
+		<p class="">&copy; 2012 Autodesk, Inc. All rights reserved.</p>
+	</div>
+</footer>
+
+
+  <!-- JavaScript at the bottom for fast page loading -->
+
+  <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="javascript/jquery-1.7.2.min.js"><\/script>')</script>
+
+	<script src="javascript/Three.js"></script>
+	<script type="text/javascript">
+
+	function loadShader(url) 
+	{
+		var shaderSource = '';
+		
+		$.ajax(
+		{
+			url: url,
+			dataType: 'text',
+			success: function(results){shaderSource = results;},
+			async:   false
+		});
+		
+		return shaderSource;
+	}
+	
+	var container;
+	
+	var camera, scene, renderer, composer;
+		
+	// set the scene size
+	var WIDTH = 600,
+	    HEIGHT = 400;
+		
+	var mouseX = 0, mouseY = 0;
+	var windowHalfX = window.innerWidth / 2;
+	var windowHalfY = window.innerHeight / 2;
+		
+	var TEXTURE_WIDTH = 512, TEXTURE_HEIGHT = 512;
+	
+	// set some camera attributes
+	var VIEW_ANGLE = 45,
+	    ASPECT = WIDTH / HEIGHT,
+	    NEAR = 0.1,
+	    FAR = 10000;
+	
+	init();
+	animate();
+	
+	function init()
+	{
+		// -----------------------------------------------------------------
+		// Init renderer
+		// -----------------------------------------------------------------
+		$container = $('#NimbusContainer');
+		renderer = new THREE.WebGLRenderer();
+		$container.append(renderer.domElement);
+		renderer.autoClear = false;
+		
+		//	Events
+		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+		window.addEventListener( 'resize', onWindowResize, false );
+		
+		// -----------------------------------------------------------------
+		// Init camera and scene
+		// -----------------------------------------------------------------	
+		camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+		camera.position.z = 4;
+		
+		scene = new THREE.Scene();
+		var material = new THREE.MeshNormalMaterial({shading: THREE.SmoothShading});
+		var width = 2, height = 2, depth = 2, segmentsWidth = 64, segmentsHeight = 64;
+		var mesh = new THREE.Mesh(
+		   new THREE.CubeGeometry(width, height, depth), material
+		);
+
+		// add the mesh to the scene
+		scene.add(mesh);
+		scene.add(camera);
+		
+		// -----------------------------------------------------------------
+		// Start the renderer
+		// -----------------------------------------------------------------
+		//renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setSize($container.width(), $container.height());
+		renderer.setClearColorHex(0x000000, 1.0);		
+	}
+	
+	function onWindowResize( event ) 
+	{
+		// renderer.setSize( window.innerWidth, window.innerHeight );
+		renderer.setSize( $container.width(), $container.height() );
+
+		// camera.aspect = window.innerWidth / window.innerHeight;
+		camera.aspect = $container.width() / $container.height();
+		camera.updateProjectionMatrix();
+	}
+	
+	function onDocumentMouseMove(event) {
+
+		mouseX = ( event.clientX - windowHalfX ) * 0.01;
+		mouseY = ( event.clientY - windowHalfY ) * 0.01;
+
+	}
+	
+	function animate() 
+	{
+		requestAnimationFrame( animate );
+	
+		render();
+	}	
+	
+	function render() 
+	{
+		// Adjust camera
+		camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+		camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+		
+		camera.position.x = camera.position.x > 5.0 ? 5.0 : camera.position.x;
+		camera.position.x = camera.position.x < -5.0 ? -5.0 : camera.position.x;
+		
+		camera.position.y = camera.position.y > 3.0 ? 3.0 : camera.position.y;
+		camera.position.y = camera.position.y < -3.0 ? -3.0 : camera.position.y;
+		
+		camera.lookAt( scene.position );
+	
+		renderer.clear();
+		
+		renderer.render(scene, camera);
+	}
+</script>
+  <script src="javascript/reality.js"></script>
+
+
+  <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you want to support IE 6.
+       chromium.org/developers/how-tos/chrome-frame-getting-started -->
+  <!--[if lt IE 7 ]>
+    <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+    <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
+  <![endif]-->
+  
+</body>
+</html>

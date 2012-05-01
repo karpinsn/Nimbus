@@ -7,13 +7,13 @@ var camera, scene, renderer, composer;
 var sceneScreen, sceneScreenCamera, sceneScreenQuad;
 
 var shaderTextureDisplay, shaderTimeClipper, shaderPhaseCalculator, shaderDepthCalculator, shaderNormalCalculator, shaderFinalRender;
-var textureHoloframe, texturePhaseMap, textureDepthMap, textureNormalMap;
+var textureHoloframe, texturePhaseMap, textureFilteredPhaseMap, textureDepthMap, textureNormalMap;
 	
 var mouseX = 0, mouseY = 0;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 	
-var TEXTURE_WIDTH = 512, TEXTURE_HEIGHT = 512;
+var TEXTURE_WIDTH = 256, TEXTURE_HEIGHT = 256;
 
 // set some camera attributes
 var VIEW_ANGLE = 45,
@@ -116,8 +116,8 @@ function initShaders()
 
 		deltaTime: 			{type: "f", value: 0.2},
 		framesPerSecond: 	{type: "f", value: 30.0},
-		cols: 				{type: "f", value: 8.0},
-		rows: 				{type: "f", value: 8.0},
+		cols: 				{type: "f", value: 16.0},
+		rows: 				{type: "f", value: 16.0},
 		depthWrite: false
 	};
 	
@@ -133,7 +133,6 @@ function initShaders()
 						 texture: textureHoloframe						
 				},
 
-		width: {type: "f", value: 512.0},
 		depthWrite: false
 	};
 	
@@ -149,7 +148,7 @@ function initShaders()
 				   texture: texturePhaseMap	
 				},
 
-		width: {type: "f", value: 512.0},
+		width: {type: "f", value: 256.0},
 		depthWrite: false
 	};
 	
@@ -165,8 +164,8 @@ function initShaders()
 				   texture: textureDepthMap	
 				},
 
-		width: {type: "f", value: 512.0},
-		height: {type: "f", value: 512.0},
+		width: {type: "f", value: 256.0},
+		height: {type: "f", value: 256.0},
 		depthWrite: false
 	};
 	
@@ -213,7 +212,6 @@ function initSceneScreen()
 	sceneScreenQuad.doubleSided = true;
 	sceneScreenQuad.scale.y = -1;
 	
-	
 	sceneScreen.add(sceneScreenQuad);
 	sceneScreen.add(sceneScreenCamera);
 }
@@ -227,7 +225,7 @@ function NimbusInit()
 	// -----------------------------------------------------------------
 	container = $('#NimbusContext');
 	renderer = new THREE.WebGLRenderer();
-	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.setSize(400, 300);
 	renderer.setClearColorHex(0x000000, 1.0);	
 	renderer.autoClear = false;
 	container.append(renderer.domElement);
@@ -285,7 +283,7 @@ function NimbusInitComplete()
 
 function onWindowResize( event ) 
 {
-	renderer.setSize( window.innerWidth, window.innerHeight );
+	//renderer.setSize( window.innerWidth, window.innerHeight );
 
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
