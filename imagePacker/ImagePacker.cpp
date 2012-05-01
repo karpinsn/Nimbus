@@ -2,6 +2,8 @@
 //
 
 #include <stdio.h>
+#include <string>
+#include <iostream>
 
 //	OpenCV includes
 #include <cv.h>
@@ -34,16 +36,23 @@ int main(int argc, char* argv[])
 {
   IplImage* megaFrame = cvCreateImage(cvSize(4096,4096), IPL_DEPTH_8U, 3);
   
-  for(int frameNumber = 0; frameNumber < 64; ++frameNumber)
+  std::cout << "Processing: " << argv[1] << " ... " << std::endl;
+  for(int frameNumber = 0; frameNumber < 256; ++frameNumber)
   {
 	char filename[1000];
-	sprintf(filename, "C:/Temp/Frames/%04d.png", frameNumber);
+	//A1whallon-bz_atsymbol_yahoo.com
+	sprintf(filename, "%s/frames/%d.png", argv[1], frameNumber);
 	IplImage* frame = cvLoadImage(filename);
 	packImage(megaFrame, frame, frameNumber);
 	cvReleaseImage(&frame);
   }
 
-  cvSaveImage("C:/Temp/megaFrame.png", megaFrame);
+  char outfile[1000];
+  sprintf(outfile, "data/%s.png", argv[1]);
+  //"C:/Users/karpinsn/Desktop/ProcessData/A1whallon-bz_atsymbol_yahoo.com.png"
+  cvSaveImage(outfile, megaFrame);
   cvReleaseImage(&megaFrame);
+
+  std::cout << "Finished!" << std::endl;
   return 0;
 }
