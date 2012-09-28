@@ -12,7 +12,7 @@
        More info: h5bp.com/b/378 -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  <title>Autodesk Reality Capture : View Results</title>
+  <title>3D Reality Capture at the GET Conference </title>
   <meta name="description" content="Autodesk Reality Capture">
   <meta name="author" content="Autodesk, Inc">
 
@@ -36,7 +36,9 @@
   <script src="javascript/modernizr.js"></script>
   
   <script type="text/javascript" src="./Libraries/sonic/sonic.js"></script>
-  <script type="text/javascript" src="./Libraries/threeJS/Three.js"></script>
+  	<script src="javascript/Three.js"></script>
+     <script src="javascript/customCam.js"></script>
+ 
   <script type="text/javascript" src="./Libraries/stats/Stats.js"></script>
   <script type="text/javascript" src="./Nimbus-Utils.js"></script>
   <script type="text/javascript" src="./Nimbus.js"></script>
@@ -48,43 +50,52 @@
 <div id="container" class="container">
 	
 	<header>
-		<div id="logo" class="container">
-			<img src="images/logo-autodesk.gif" />
-		</div>
+
+	<a href='http://www.getconference.org/GET2012/index.html'>
 		<div id="product-name" class="container">
-			<h1>Reality Capture</h1>
+	
 		</div>
+			</a>
 	</header>
 	
 	<div id="main" role="main" class="clearfix">
 		
 		<div class="results-text">
 			<h2>Results of Your Reality Capture </h2>
-			<p>The box below shows the representation of your face captured
-			at the GET Conference. Move the mouse to rotate the 3D object.</p>
+			<p>The box below shows the representation of your face captured at the  <a href='http://www.getconference.org/GET2012/index.html'>GET Conference</a>. Make sure you are on the latest <a href='http://www.google.com/chrome'>Chrome</a> browser.</p>
 		</div>
 
 		<div id="NimbusContext" class="reality-capture-viewer">
-			<div id="NimbusLoadingDialog">
-				Loading...
-				<div id="NimbusLoaderIndicator"></div>
+			<div id="NimbusLoadingDialog" style="color:rgb(118,118,118); position: absolute; left:360px; top:510px;">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loading...
+				<div id="NimbusLoaderIndicator" style="margin-top:7px;"></div>
 			</div>
+		<div id="navCube" style="position:absolute; left:625px; top:180px"></div>
+				<a href='http://www.vrac.iastate.edu/~song/'><div id = "iowaattrib" class="iowaattrib"></div></a>
+		<a href='http://nikkarpinsky.com/research/nimbus/'><div id = "nimbusattrib" class="nimbusattrib"></div></a>		
+		<a href='http://www.autodesk.com'><div id = "autodeskattrib" class="autodeskattrib"></div></a>	
+		<div id = "gotoHome" class="gotoHome" onclick="gotoHome()" onmouseover="glowOnHome(this)" onmouseout="glowOffHome(this)">	</div> 
+                <div id="toolContainer" >
+                 <div id="toolActions" style="vertical-align:middle; position:absolute; left:8px; top:3px;">
+                  <div id="toolRotate" onmouseover="glowOn(this)" onmouseout="glowOff(this)"  onclick="doRotate()" class="toolBase toolRotate toolSelected" style="display: block; "></div>
+                  <div id="toolPan" onmouseover="glowOn(this)" onmouseout="glowOff(this)"  onclick="doPan()" class="toolBase toolPan" style="display: block; "></div>
+                  <div id="toolZoomIn" onmouseover="glowOn(this)" onmouseout="glowOff(this)"  onclick="doZoomIn()" class="toolBase toolZoomIn" style="display: block; "></div>
+				  <div id="divider1" class="divider"></div>
+                  <div id="toolWireframe" onmouseover="glowOn(this)" onmouseout="glowOff(this)"  onclick="doWireframe()" class="toolBase toolWireframe toolSelected" style="display: block; "></div>
+				  <div id="divider2" class="divider"></div>
+				  <div id="toolFullscreen" onmouseover="glowOn(this)" onmouseout="glowOff(this)" class="toolBase toolFullscreen" style="display: block;" onclick="myfullscreen('yes')"></div>
+                </div>
+              </div>
+		  
+			
 		</div>
 
+        <div id = "cp" class="copyright"> <p class="">&copy; 2012 Iowa State University. All rights reserved. &nbsp; &nbsp; &nbsp;&copy; 2012 Autodesk Inc. All rights reserved.</p></div>
 	</div>
 
 </div> <!--! end of #container -->
 </div>
-<footer>
-	<div class="container">
-		<div class="row">
-		<div id="autodesk" class="sponsor one-third column"><p>Autodesk</p></div>
-		<div id="hcivrac" class="sponsor one-third column"><p>Reality Capture</p></div>
-		<div id="isu" class="sponsor one-third column omega"><p>Iowa State University</p></div>
-		</div>
-		<p class="">&copy; 2012 Autodesk, Inc. All rights reserved.</p>
-	</div>
-</footer>
+
 
 
   <!-- JavaScript at the bottom for fast page loading -->
@@ -95,7 +106,7 @@
 
   <script src="javascript/reality.js"></script>
 
-  <script type="text/javascript">
+  <script type="text/javascript">	
 	NimbusInit();
 	NimbusRun();
   </script>
