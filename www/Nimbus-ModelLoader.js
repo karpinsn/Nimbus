@@ -1,10 +1,39 @@
-function TimeClippedHoloimage(textureWidth, textureHeight, data)
+Nimbus.HoloimageTimeClip = function ( textureWidth, textureHeight, data )
 {
     //  Textures used by the Holoimage model
-    var textureHoloframe = new THREE.WebGLRenderTarget(textureWidth, textureHeight, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat});
-    var texturePhaseMap = new THREE.WebGLRenderTarget(textureWidth, textureHeight, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
-	var textureDepthMap = new THREE.WebGLRenderTarget(textureWidth, textureHeight, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
-	var textureNormalMap = new THREE.WebGLRenderTarget(textureWidth, textureHeight, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat});
+    var textureHoloframe = new THREE.WebGLRenderTarget(
+		textureWidth, 
+		textureHeight, 
+		{	minFilter: THREE.LinearFilter, 
+			magFilter: THREE.NearestFilter, 
+			format: THREE.RGBFormat
+		});
+		
+    var texturePhaseMap = new THREE.WebGLRenderTarget(
+		textureWidth, 
+		textureHeight, 
+		{	minFilter: THREE.LinearFilter, 
+			magFilter: THREE.NearestFilter, 
+			format: THREE.RGBFormat, 
+			type: THREE.FloatType
+		});
+		
+	var textureDepthMap = new THREE.WebGLRenderTarget(
+		textureWidth, 
+		textureHeight, 
+		{	minFilter: THREE.LinearFilter, 
+			magFilter: THREE.NearestFilter, 
+			format: THREE.RGBFormat, 
+			type: THREE.FloatType
+		});
+	
+	var textureNormalMap = new THREE.WebGLRenderTarget(
+		textureWidth, 
+		textureHeight, 
+		{	minFilter: THREE.LinearFilter, 
+			magFilter: THREE.NearestFilter, 
+			format: THREE.RGBFormat
+		});
 
 	var uniformsTimeClipper = {
 		textureOverTime: {type: "t", 
@@ -112,7 +141,7 @@ function TimeClippedHoloimage(textureWidth, textureHeight, data)
 	sceneScreen.add(sceneScreenCamera);  
 
     //  Used for time clipping (animation)
-    this.startTime = new Date().getTime();
+    var startTime = new Date().getTime();
 
     this.draw = function(scene, camera)
     {
@@ -136,6 +165,6 @@ function TimeClippedHoloimage(textureWidth, textureHeight, data)
 
         // Pass 4 - Final Render
         renderer.render(scene, camera);
-    }
+    };
 };
 
