@@ -17,7 +17,9 @@ var incFov;
 var incPosition, incRotation, incUp, incTarget;
 var HOME_STEPS = 30;
 var homeFrame = 0;
-	
+
+var holoimage;
+
 var shaderTextureDisplay, shaderTimeClipper, shaderPhaseCalculator, shaderDepthCalculator, shaderNormalCalculator, shaderFinalRender;
 var textureHoloframe, texturePhaseMap, textureFilteredPhaseMap, textureDepthMap, textureNormalMap;
 
@@ -25,17 +27,17 @@ var mouse = { x: 0, y: 0 }, INTERSECTED;
 
 // set the scene size
 var WIDTH = 800,
-	HEIGHT = 600;
-		
+    HEIGHT = 600;
+
 var TEXTURE_WIDTH = 256, TEXTURE_HEIGHT = 256;
 
 var NAV_WIDTH = 256, NAV_HEIGHT = 256;
 // set some camera attributes
 var VIEW_ANGLE = 45,
-	ASPECT = 400 / 300,
-	NEAR = .1,
-	FAR = 10000;
-	
+    ASPECT = 400 / 300,
+    NEAR = .1,
+    FAR = 10000;
+
 var loadingIndicatorDiv, loadingIndicator;
 
 var dataLoaded = false;
@@ -43,702 +45,493 @@ var renderInit = false;
 
 function showLoading()
 {
-	loader = {
-		width: 100,
-		height: 50,
-		padding: 10,
+    loader = {
+        width: 100,
+        height: 50,
+        padding: 10,
 
-		stepsPerFrame: 2,
-		trailLength: 1,
-		pointDistance: .03,
+        stepsPerFrame: 2,
+        trailLength: 1,
+        pointDistance: .03,
 
-		strokeColor: '#FF7B24',
-		
-		step: 'fader',
+        strokeColor: '#FF7B24',
 
-		multiplier: 2,
+        step: 'fader',
 
-		setup: function() {
-			this._.lineWidth = 5;
-		},
+        multiplier: 2,
 
-		path: [
-			['arc', 10, 10, 10, -270, -90],
-			['bezier', 10, 0, 40, 20, 20, 0, 30, 20],
-			['arc', 40, 10, 10, 90, -90],
-			['bezier', 40, 0, 10, 20, 30, 0, 20, 20]
-		]
-	};
-	loadingIndicator = new Sonic(loader);
-	
-	//	Make the dialog visible
-	var loadingContainer = document.getElementById('NimbusLoadingDialog');
-	loadingContainer.style.display = "block";
-	
-	loadingIndicatorDiv = document.getElementById('NimbusLoaderIndicator');
+        setup: function() {
+            this._.lineWidth = 5;
+        },
 
-	
-	loadingIndicatorDiv.appendChild(loadingIndicator.canvas);
+        path: [
+            ['arc', 10, 10, 10, -270, -90],
+        ['bezier', 10, 0, 40, 20, 20, 0, 30, 20],
+        ['arc', 40, 10, 10, 90, -90],
+        ['bezier', 40, 0, 10, 20, 30, 0, 20, 20]
+            ]
+    };
+    loadingIndicator = new Sonic(loader);
 
-	loadingIndicator.play();
+    //	Make the dialog visible
+    var loadingContainer = document.getElementById('NimbusLoadingDialog');
+    loadingContainer.style.display = "block";
+
+    loadingIndicatorDiv = document.getElementById('NimbusLoaderIndicator');
+
+
+    loadingIndicatorDiv.appendChild(loadingIndicator.canvas);
+
+    loadingIndicator.play();
 }
 
 function hideLoading()
 {
-	//	Hide the indicator
-	var loadingContainer = document.getElementById('NimbusLoadingDialog');
-	loadingContainer.style.display = "none";
-	loadingIndicator.stop();
-}
-	
-function initTextures()
-{	
-	//	Needed to enable floating point textures
-	var gl = renderer.context;
-	if (!gl.getExtension("OES_texture_float")) {
-	   throw("Requires OES_texture_float extension");
-	}
-	
-	textureHoloframe = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat});
-	texturePhaseMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
-	textureDepthMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat, type: THREE.FloatType});
-	textureNormalMap = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat});
-}
-
-function initShaders()
-{
-	var uniformsTextureDisplay = {
-		image: {type: "t", 
-				value: 0,
-				texture: textureHoloframe
-				}
-	};
-	
-	shaderTextureDisplay = new THREE.ShaderMaterial({
-		uniforms: uniformsTextureDisplay,
-		vertexShader: loadShader('./shaders/TextureDisplay.vert'),
-		fragmentShader: loadShader('./shaders/TextureDisplay.frag')
-	});
-	
-	//	Retrieve the data to display
-	var data = getUrlVars()["data"];
-	
-	if(typeof data === "undefined") {
-	    window.location = "http://www.autodesk.com";
-	}
-	
-	var uniformsTimeClipper = {
-		textureOverTime: {type: "t", 
-						 value: 0,		
-						 texture: THREE.ImageUtils.loadTexture(data, THREE.UVMapping, function(){dataLoaded = true; NimbusInitComplete();})
-				},
-
-		deltaTime: 			{type: "f", value: 0.2},
-		framesPerSecond: 	{type: "f", value: 30.0},
-		cols: 				{type: "f", value: 16.0},
-		rows: 				{type: "f", value: 16.0},
-		depthWrite: false
-	};
-	
-	shaderTimeClipper = new THREE.ShaderMaterial({
-		uniforms: uniformsTimeClipper,
-		vertexShader: loadShader('./shaders/TimeClipper.vert'),
-		fragmentShader: loadShader('./shaders/TimeClipper.frag')
-	});
-	
-	var uniformsPhaseCalculator = {
-		holovideoFrame: {type: "t", 
-						 value: 0,
-						 texture: textureHoloframe						
-				},
-
-		depthWrite: false
-	};
-	
-	shaderPhaseCalculator = new THREE.ShaderMaterial({
-		uniforms: uniformsPhaseCalculator,
-		vertexShader: loadShader('./shaders/PhaseCalculator.vert'),
-		fragmentShader: loadShader('./shaders/PhaseCalculator.frag')
-	});
-	
-	var uniformsDepthCalculator = {
-		phaseMap: {type: "t", 
-				   value: 0,
-				   texture: texturePhaseMap	
-				},
-
-		width: {type: "f", value: 256.0},
-		depthWrite: false
-	};
-	
-	shaderDepthCalculator = new THREE.ShaderMaterial({
-		uniforms: uniformsDepthCalculator,
-		vertexShader: loadShader('./shaders/DepthCalculator.vert'),
-		fragmentShader: loadShader('./shaders/DepthCalculator.frag')
-	});
-	
-	var uniformsNormalCalculator = {
-		depthMap: {type: "t", 
-				   value: 0,
-				   texture: textureDepthMap	
-				},
-
-		width: {type: "f", value: 256.0},
-		height: {type: "f", value: 256.0},
-		depthWrite: false
-	};
-	
-	shaderNormalCalculator = new THREE.ShaderMaterial({
-		uniforms: uniformsNormalCalculator,
-		vertexShader: loadShader('./shaders/NormalCalculator.vert'),
-		fragmentShader: loadShader('./shaders/NormalCalculator.frag')
-	});
-	
-	var uniformsFinalRender = {
-		depthMap: {type: "t", 
-				   value: 0,
-				   texture: textureDepthMap	
-				},
-
-		normalMap: {type: "t", 
-				   value: 1,
-				   texture: textureNormalMap	
-				},
-			
-		holovideoFrame: {type: "t", 
-						 value: 2,
-						 texture: textureHoloframe						
-				},
-			
-		depthWrite: false
-	};
-	
-	shaderFinalRender = new THREE.ShaderMaterial({
-		uniforms: uniformsFinalRender,
-		vertexShader: loadShader('./shaders/FinalRender.vert'),
-		fragmentShader: loadShader('./shaders/FinalRender.frag')
-	});
-}
-
-function initSceneScreen()
-{
-	sceneScreenCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
-	sceneScreenCamera.position.z = 1;
-
-	sceneScreen = new THREE.Scene();
-	sceneScreenPlane = new THREE.PlaneGeometry(2, 2, 1, 1);
-	sceneScreenQuad = new THREE.Mesh(sceneScreenPlane, shaderPhaseCalculator);
-	sceneScreenQuad.doubleSided = true;
-	sceneScreenQuad.scale.y = -1;
-	
-	sceneScreen.add(sceneScreenQuad);
-	sceneScreen.add(sceneScreenCamera);
+    //	Hide the indicator
+    var loadingContainer = document.getElementById('NimbusLoadingDialog');
+    loadingContainer.style.display = "none";
+    loadingIndicator.stop();
 }
 
 function NimbusInit()
 {
-	showLoading();
+    showLoading();
 
-	// -----------------------------------------------------------------
-	// Init renderer
-	// -----------------------------------------------------------------
-	$container = $('#NimbusContext');
-	$navCube = $('#navCube');
-	
-	renderer = new THREE.WebGLRenderer();
-	navrenderer = new THREE.WebGLRenderer();
+    // -----------------------------------------------------------------
+    // Init renderer
+    // -----------------------------------------------------------------
+    $container = $('#NimbusContext');
+    $navCube = $('#navCube');
 
-	$container.append(renderer.domElement);
-	$navCube.append(navrenderer.domElement);
+    renderer = new THREE.WebGLRenderer();
+    navrenderer = new THREE.WebGLRenderer();
 
-	navrenderer.setSize(NAV_WIDTH,NAV_HEIGHT);
-	navrenderer.autoClear = false;
-		
-	renderer.setSize(WIDTH, HEIGHT);
-	renderer.setClearColorHex(0x000000, 1.0);	
-	renderer.autoClear = false;
+    $container.append(renderer.domElement);
+    $navCube.append(navrenderer.domElement);
 
-	// -----------------------------------------------------------------
-	// Init stats calculator
-	// -----------------------------------------------------------------
-	//stats = new Stats();
-	//stats.domElement.style.position = 'absolute';
-	//stats.domElement.style.bottom = '0px';
-	//stats.domElement.style.right = '0px';
-	//$container.append( stats.domElement );
-		
-	//	Events
-	window.addEventListener( 'resize', onWindowResize, false );
-	
-	// -----------------------------------------------------------------
-	// Init textures and shaders
-	// -----------------------------------------------------------------		
-	initTextures();
-	initShaders();
-	initSceneScreen();
-	
-	// -----------------------------------------------------------------
-	// Init camera
-	// -----------------------------------------------------------------	
-	camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-	camera.position.z = 4;
+    navrenderer.setSize(NAV_WIDTH,NAV_HEIGHT);
+    navrenderer.autoClear = false;
 
-	
-	navcam = new THREE.PerspectiveCamera(VIEW_ANGLE, 1, NEAR, FAR);
-	navcam.position.z = 14;
+    renderer.setSize(WIDTH, HEIGHT);
+    renderer.setClearColorHex(0x000000, 1.0);	
+    renderer.autoClear = false;
 
-		
-	// -----------------------------------------------------------------
-	// Init controls
-	// -----------------------------------------------------------------
-	controls = new THREE.TrackballControls2( camera, renderer.domElement, this );
-		
-	controls.target.set( 0, 0, 0 );
-	controls.rotateSpeed = 0.5;
-	controls.zoomSpeed = 1.2;
-	controls.panSpeed = 0.5;
+    // -----------------------------------------------------------------
+    // Init stats calculator
+    // -----------------------------------------------------------------
+    //stats = new Stats();
+    //stats.domElement.style.position = 'absolute';
+    //stats.domElement.style.bottom = '0px';
+    //stats.domElement.style.right = '0px';
+    //$container.append( stats.domElement );
 
-	controls.noZoom = false;
-	controls.noPan = false;
+    //	Events
+    window.addEventListener( 'resize', onWindowResize, false );
 
-	controls.staticMoving = false;
-	controls.dynamicDampingFactor = 0.3;
-
-	controls.keys = [ 65, 83, 68 ];
-
-	navcontrols = new THREE.TrackballControls( navcam, navrenderer.domElement );
-	navcontrols.rotateSpeed = 0.5;
-
-	navcontrols.noZoom = true;
-	navcontrols.noPan = true;
-	navcontrols.noRotate = true;
-
-	navcontrols.staticMoving = false;
-	navcontrols.rotateSpeed = 1.0;
-	navcontrols.dynamicDampingFactor = 0.3;
-
-	navcontrols.minDistance = 1 * 1.1;
-	navcontrols.maxDistance = 1 * 100;
-	
-	// -----------------------------------------------------------------
-	// Init scene
-	// -----------------------------------------------------------------		
-	scene = new THREE.Scene();
-	var width = 2, height = 2, segmentsWidth = 256, segmentsHeight = 256, depth = 2;
-	var mesh = new THREE.Mesh(
-	   new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
-	   shaderFinalRender 
-	);
-
-	navscene = new THREE.Scene();
-	var navmaterial = new THREE.MeshNormalMaterial({shading: THREE.SmoothShading, transparemt: true});
-	var navmesh = new THREE.Mesh(
-	   new THREE.CubeGeometry(width, height, depth), navmaterial
-	);		
-	//////////////////
-	var navmaterials = [];
-	for (var i=0; i<6; i++) {
-	  var img = new Image();
-	  img.src = i + '.png';
-	  var tex = new THREE.Texture(img);
-	  img.tex = tex;
-	  img.onload = function() {
-		this.tex.needsUpdate = true;
-	  };
-	  var mat = new THREE.MeshBasicMaterial({color: 0xffffff, map: tex});
-	  navmaterials.push(mat);
+    // -----------------------------------------------------------------
+    // Init mesh
+    // -----------------------------------------------------------------		
+	//	Needed to enable floating point textures
+	var gl = renderer.context;
+	if (!gl.getExtension("OES_texture_float")) {
+		throw("Requires OES_texture_float extension");
 	}
-	var cubeGeo = new THREE.CubeGeometry(width,height,depth,1,1,1, navmaterials);
-	var cube = new THREE.Mesh(cubeGeo, new THREE.MeshFaceMaterial());	
-	navscene.add(cube);
-	navscene.add(navcam);
-	navrenderer.setSize(NAV_WIDTH, NAV_HEIGHT);
-	navrenderer.setClearColorHex(0x000000, 0.0);	
-		
-	// add the mesh to the scene
-	scene.add(mesh);
 	
-	scene.add(camera);
-	renderer.setSize(WIDTH, HEIGHT);
-	renderer.setClearColorHex(0x000000, 1.0);		
-		
-
-				
-	startTime = new Date().getTime();	
+	//	Retrieve the data to display
+	var data = getUrlVars()["data"];
+	holoimage = new TimeClippedHoloimage(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
 	
-	renderInit = true;
+    // -----------------------------------------------------------------
+    // Init camera
+    // -----------------------------------------------------------------	
+    camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+    camera.position.z = 4;
 
-	NimbusInitComplete();
+
+    navcam = new THREE.PerspectiveCamera(VIEW_ANGLE, 1, NEAR, FAR);
+    navcam.position.z = 14;
+
+
+    // -----------------------------------------------------------------
+    // Init controls
+    // -----------------------------------------------------------------
+    controls = new THREE.TrackballControls2( camera, renderer.domElement, this );
+
+    controls.target.set( 0, 0, 0 );
+    controls.rotateSpeed = 0.5;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.5;
+
+    controls.noZoom = false;
+    controls.noPan = false;
+
+    controls.staticMoving = false;
+    controls.dynamicDampingFactor = 0.3;
+
+    controls.keys = [ 65, 83, 68 ];
+
+    navcontrols = new THREE.TrackballControls( navcam, navrenderer.domElement );
+    navcontrols.rotateSpeed = 0.5;
+
+    navcontrols.noZoom = true;
+    navcontrols.noPan = true;
+    navcontrols.noRotate = true;
+
+    navcontrols.staticMoving = false;
+    navcontrols.rotateSpeed = 1.0;
+    navcontrols.dynamicDampingFactor = 0.3;
+
+    navcontrols.minDistance = 1 * 1.1;
+    navcontrols.maxDistance = 1 * 100;
+
+    // -----------------------------------------------------------------
+    // Init scene
+    // -----------------------------------------------------------------		
+    scene = new THREE.Scene();
+    var width = 2, height = 2, segmentsWidth = 256, segmentsHeight = 256, depth = 2;
+    var mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
+            shaderFinalRender 
+            );
+
+    navscene = new THREE.Scene();
+    var navmaterial = new THREE.MeshNormalMaterial({shading: THREE.SmoothShading, transparemt: true});
+    var navmesh = new THREE.Mesh(
+            new THREE.CubeGeometry(width, height, depth), navmaterial
+            );		
+    //////////////////
+    var navmaterials = [];
+    for (var i=0; i<6; i++) {
+        var img = new Image();
+        img.src = i + '.png';
+        var tex = new THREE.Texture(img);
+        img.tex = tex;
+        img.onload = function() {
+            this.tex.needsUpdate = true;
+        };
+        var mat = new THREE.MeshBasicMaterial({color: 0xffffff, map: tex});
+        navmaterials.push(mat);
+    }
+    var cubeGeo = new THREE.CubeGeometry(width,height,depth,1,1,1, navmaterials);
+    var cube = new THREE.Mesh(cubeGeo, new THREE.MeshFaceMaterial());	
+    navscene.add(cube);
+    navscene.add(navcam);
+    navrenderer.setSize(NAV_WIDTH, NAV_HEIGHT);
+    navrenderer.setClearColorHex(0x000000, 0.0);	
+
+    // add the mesh to the scene
+    scene.add(mesh);
+
+    scene.add(camera);
+    renderer.setSize(WIDTH, HEIGHT);
+    renderer.setClearColorHex(0x000000, 1.0);		
+
+    startTime = new Date().getTime();	
+
+    renderInit = true;
+
+    NimbusInitComplete();
 }
 
 function NimbusInitComplete()
 {
-	if(dataLoaded && renderInit)
-	{
-		hideLoading();
-	}
+    if(dataLoaded && renderInit)
+    {
+        hideLoading();
+    }
 }
 
 function onWindowResize( event ) 
 {
-	//camera.updateProjectionMatrix();
+    width = WIDTH;
+    height = HEIGHT;
 
-	width = WIDTH;
-	height = HEIGHT;
+    renderer.setSize( width, height );
 
-	renderer.setSize( width, height );
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
 
-	camera.aspect = width / height;
-	camera.updateProjectionMatrix();
+    controls.screen.width = width;
+    controls.screen.height = height;
 
-	controls.screen.width = width;
-	controls.screen.height = height;
-
-	camera.radius = ( width + height ) / 4;
-	/////
-	navrenderer.setSize(NAV_WIDTH,NAV_HEIGHT);
-	navcam.aspect = 1;
-	navcam.updateProjectionMatrix();
-	navcam.radius = ( 200 ) / 4;	
+    camera.radius = ( width + height ) / 4;
+ 
+    navrenderer.setSize(NAV_WIDTH,NAV_HEIGHT);
+    navcam.aspect = 1;
+    navcam.updateProjectionMatrix();
+    navcam.radius = ( 200 ) / 4;	
 }
 
 function doPan() {
-  $("#toolPan").addClass("toolSelected");
-  $("#toolRotate").removeClass("toolSelected");
-  $("#toolZoomIn").removeClass("toolSelected");
-  $("#toolZoomOut").removeClass("toolSelected");
-  controls.setPan();
-  $("#toolPan").toggleClass("toolSelected");
-  uiMode = 1;
-  
+    $("#toolPan").addClass("toolSelected");
+    $("#toolRotate").removeClass("toolSelected");
+    $("#toolZoomIn").removeClass("toolSelected");
+    $("#toolZoomOut").removeClass("toolSelected");
+    controls.setPan();
+    $("#toolPan").toggleClass("toolSelected");
+    uiMode = 1;
+
 } 
 
 function doRotate() {
-  $("#toolPan").removeClass("toolSelected");
-  $("#toolRotate").addClass("toolSelected");
-  $("#toolZoomIn").removeClass("toolSelected");
-  $("#toolZoomOut").removeClass("toolSelected");
-  controls.setRotate();
-  $("#toolRotate").toggleClass("toolSelected");
-  uiMode = 0;
+    $("#toolPan").removeClass("toolSelected");
+    $("#toolRotate").addClass("toolSelected");
+    $("#toolZoomIn").removeClass("toolSelected");
+    $("#toolZoomOut").removeClass("toolSelected");
+    controls.setRotate();
+    $("#toolRotate").toggleClass("toolSelected");
+    uiMode = 0;
 } 
 
 function doZoomIn() {
-  $("#toolPan").removeClass("toolSelected");
-  $("#toolRotate").removeClass("toolSelected");
-  $("#toolZoomIn").addClass("toolSelected");
-  $("#toolZoomOut").removeClass("toolSelected");
-  controls.setZoom();
-  $("#toolZoomIn").toggleClass("toolSelected");
-  uiMode = 2;
+    $("#toolPan").removeClass("toolSelected");
+    $("#toolRotate").removeClass("toolSelected");
+    $("#toolZoomIn").addClass("toolSelected");
+    $("#toolZoomOut").removeClass("toolSelected");
+    controls.setZoom();
+    $("#toolZoomIn").toggleClass("toolSelected");
+    uiMode = 2;
 } 
 
 function gotoHome() {
 
-	if ( bHomeTraversal == false ) {
-		bHomeTraversal = true;
-		
-		incFov = (45.0 - VIEW_ANGLE) / HOME_STEPS;
-		
-		incPosition = new THREE.Vector3();
-		incRotation = new THREE.Vector3();
-		incUp       = new THREE.Vector3();
-		incTarget       = new THREE.Vector3();
+    if ( bHomeTraversal == false ) {
+        bHomeTraversal = true;
 
-		
-		incPosition.x = -camera.position.x / HOME_STEPS;
-		incPosition.y = -camera.position.y / HOME_STEPS;
-		incPosition.z = (4.0-camera.position.z) / HOME_STEPS;
+        incFov = (45.0 - VIEW_ANGLE) / HOME_STEPS;
 
-		incRotation.x = -camera.rotation.x / HOME_STEPS;
-		incRotation.y = -camera.rotation.y / HOME_STEPS;
-		incRotation.z = -camera.rotation.z / HOME_STEPS;
-	
-		incRotation.x = -camera.rotation.x / HOME_STEPS;
-		incRotation.y = -camera.rotation.y / HOME_STEPS;
-		incRotation.z = -camera.rotation.z / HOME_STEPS;
-		
-		incUp.x = -camera.up.x / HOME_STEPS;
-		incUp.y = 1-camera.up.y / HOME_STEPS;
-		incUp.z = -camera.up.z / HOME_STEPS;
-		
-		incTarget.x = -controls.target.x / HOME_STEPS;
-		incTarget.y = -controls.target.y / HOME_STEPS;
-		incTarget.z = -controls.target.z / HOME_STEPS;
-		
-		// camera.position.x = 0;
-		// camera.position.y = 0;
-		// camera.position.z = 4;
+        incPosition = new THREE.Vector3();
+        incRotation = new THREE.Vector3();
+        incUp       = new THREE.Vector3();
+        incTarget       = new THREE.Vector3();
 
-		// camera.rotation.x = 0;
-		// camera.rotation.y = 0;
-		// camera.rotation.z = 0;
-		
-		// camera.up.x = 0;
-		// camera.up.y = 1;
-		// camera.up.z = 0;
-		
-		//controls.target.set(0,0,0);
-	}
-		
+
+        incPosition.x = -camera.position.x / HOME_STEPS;
+        incPosition.y = -camera.position.y / HOME_STEPS;
+        incPosition.z = (4.0-camera.position.z) / HOME_STEPS;
+
+        incRotation.x = -camera.rotation.x / HOME_STEPS;
+        incRotation.y = -camera.rotation.y / HOME_STEPS;
+        incRotation.z = -camera.rotation.z / HOME_STEPS;
+
+        incRotation.x = -camera.rotation.x / HOME_STEPS;
+        incRotation.y = -camera.rotation.y / HOME_STEPS;
+        incRotation.z = -camera.rotation.z / HOME_STEPS;
+
+        incUp.x = -camera.up.x / HOME_STEPS;
+        incUp.y = 1-camera.up.y / HOME_STEPS;
+        incUp.z = -camera.up.z / HOME_STEPS;
+
+        incTarget.x = -controls.target.x / HOME_STEPS;
+        incTarget.y = -controls.target.y / HOME_STEPS;
+        incTarget.z = -controls.target.z / HOME_STEPS;
+    }
+
 }
 
 function updateHomeTraversal() {
-	if ( bHomeTraversal == true ) {
-		camera.fov = VIEW_ANGLE + incFov * homeFrame++;
+    if ( bHomeTraversal == true ) {
+        camera.fov = VIEW_ANGLE + incFov * homeFrame++;
 
-		camera.position.x += incPosition.x;
-		camera.position.y += incPosition.y;
-		camera.position.z += incPosition.z;
+        camera.position.x += incPosition.x;
+        camera.position.y += incPosition.y;
+        camera.position.z += incPosition.z;
 
-		camera.rotation.x += incRotation.x;
-		camera.rotation.y += incRotation.y;
-		camera.rotation.z += incRotation.z;
+        camera.rotation.x += incRotation.x;
+        camera.rotation.y += incRotation.y;
+        camera.rotation.z += incRotation.z;
 
-		camera.up.x += incUp.x;
-		camera.up.y += incUp.y;
-		camera.up.z += incUp.z;
-		
-//		camera.rotation.x = 0;
-//		camera.rotation.y = 0;
-//		camera.rotation.z = 0;
-		
-//		camera.up.x = 0;
-//		camera.up.y = 1;
-//		camera.up.z = 0;
-		
-		controls.target.x += incTarget.x;
-		controls.target.y += incTarget.y;
-		controls.target.z += incTarget.z;		
-		//controls.target.set(0,0,0);	
-		camera.updateProjectionMatrix();
-		if ( homeFrame > HOME_STEPS) {
-		    bHomeTraversal = false;
-			VIEW_ANGLE = camera.fov;
-			homeFrame = 0;
-		}	
-	}
+        camera.up.x += incUp.x;
+        camera.up.y += incUp.y;
+        camera.up.z += incUp.z;
+
+        controls.target.x += incTarget.x;
+        controls.target.y += incTarget.y;
+        controls.target.z += incTarget.z;		
+        //controls.target.set(0,0,0);	
+        camera.updateProjectionMatrix();
+        if ( homeFrame > HOME_STEPS) {
+            bHomeTraversal = false;
+            VIEW_ANGLE = camera.fov;
+            homeFrame = 0;
+        }	
+    }
 }
 
 function doZoomOut() {
-  $("#toolPan").removeClass("toolSelected");
-  $("#toolRotate").removeClass("toolSelected");
-  $("#toolZoomIn").removeClass("toolSelected");
-  $("#toolZoomOut").addClass("toolSelected");
+    $("#toolPan").removeClass("toolSelected");
+    $("#toolRotate").removeClass("toolSelected");
+    $("#toolZoomIn").removeClass("toolSelected");
+    $("#toolZoomOut").addClass("toolSelected");
 } 
 
 function doWireframe() {
-  $("#toolWireframe").toggleClass("toolSelected");
-  bWire = !bWire;
+    $("#toolWireframe").toggleClass("toolSelected");
+    bWire = !bWire;
 } 
 
-
-			
-  
 function glowOn(d) {
-   var name = "#" + d.id.toString();
-   $(name).toggleClass("toolSelected");
-   $(name).addClass("toolHover");
+    var name = "#" + d.id.toString();
+    $(name).toggleClass("toolSelected");
+    $(name).addClass("toolHover");
 }
 
 function glowOff(d) {
-var name = "#" + d.id.toString();
-$(name).toggleClass("toolSelected");
-$(name).removeClass("toolHover");
-
+    var name = "#" + d.id.toString();
+    $(name).toggleClass("toolSelected");
+    $(name).removeClass("toolHover");
 }
-	  
+
 function glowOnHome(d) {
-   var name = "#" + d.id.toString();
-   $(name).addClass("homeHover");
+    var name = "#" + d.id.toString();
+    $(name).addClass("homeHover");
 }
 
 function glowOffHome(d) {
-var name = "#" + d.id.toString();
-$(name).removeClass("homeHover");
-
+    var name = "#" + d.id.toString();
+    $(name).removeClass("homeHover");
 }
-	  
+
 function requestFullScreen(el) {
-// Supports most browsers and their versions.
-var requestMethod = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullScreen;
+    // Supports most browsers and their versions.
+    var requestMethod = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullScreen;
 
-if (requestMethod) { // Native full screen.
-	requestMethod.call(el);
-} else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
-		var wscript = new ActiveXObject("WScript.Shell");
-		if (wscript !== null) {
-			wscript.SendKeys("{F11}");
-		}
-}
+    if (requestMethod) { // Native full screen.
+        requestMethod.call(el);
+    } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+        var wscript = new ActiveXObject("WScript.Shell");
+        if (wscript !== null) {
+            wscript.SendKeys("{F11}");
+        }
+    }
 }
 
 function cancelFullScreen() {
-if ($.browser.mozilla) {
-	document.mozCancelFullScreen();
-} else if ($.browser.safari || $.browser.chrome) {
-	document.webkitCancelFullScreen();
-}
+    if ($.browser.mozilla) {
+        document.mozCancelFullScreen();
+    } else if ($.browser.safari || $.browser.chrome) {
+        document.webkitCancelFullScreen();
+    }
 }
 
 document.addEventListener("mozfullscreenchange", function () {
     if (document.mozFullScreen == false) {
-	    full_screen = 1;
-	    myfullscreen('1');
-		$("#toolFullscreen").toggleClass("toolSelected");
-	}
+        full_screen = 1;
+        myfullscreen('1');
+        $("#toolFullscreen").toggleClass("toolSelected");
+    }
 }, false);
 
 document.addEventListener("webkitfullscreenchange", function () {
     if (document.webkitIsFullScreen == false) {
-	    full_screen = 1;
-	    myfullscreen('1');
-	}
-	$("#toolFullscreen").toggleClass("toolSelected");
+        full_screen = 1;
+        myfullscreen('1');
+    }
+    $("#toolFullscreen").toggleClass("toolSelected");
 }, false);
 
 
 function myfullscreen( value )
 {
-   if (full_screen == 0) {
-	   requestFullScreen(document.getElementById("NimbusContext"));
-	   WIDTH = screen.width;
-	   HEIGHT = screen.height;
-	   $container.css("width", WIDTH);
-	   $container.css("height", HEIGHT);
-	   renderer.setSize( WIDTH, HEIGHT);
-	   
-	   camera.updateProjectionMatrix();
+    if (full_screen == 0) {
+        requestFullScreen(document.getElementById("NimbusContext"));
+        WIDTH = screen.width;
+        HEIGHT = screen.height;
+        $container.css("width", WIDTH);
+        $container.css("height", HEIGHT);
+        renderer.setSize( WIDTH, HEIGHT);
 
-	   $('#toolContainer').css("position","absolute");
-	   $('#toolContainer').css("width","45");
-	   $('#toolContainer').css("left",(WIDTH - 55).toString() + "px");
-	   
+        camera.updateProjectionMatrix();
 
-	   $('#navCube').css("left", (WIDTH - 175).toString() + "px");
-	   $('#navCube').css("top", "-70px");
-	   $('#NimbusContext').css("margin-top","0px");
-	   
-	   $('#gotoHome').css("left", (WIDTH - 110).toString() + "px");
-	   $('#gotoHome').css("top", "15px");
-	   
-	   $('#autodeskattrib').css("left", (WIDTH - 110).toString() + "px");
-	   $('#autodeskattrib').css("top", (HEIGHT - 50).toString() + "px");
+        $('#toolContainer').css("position","absolute");
+        $('#toolContainer').css("width","45");
+        $('#toolContainer').css("left",(WIDTH - 55).toString() + "px");
 
 
-	   $('#nimbusattrib').css("top", (HEIGHT - 50).toString() + "px");
-	   $('#iowaattrib').css("top", (HEIGHT - 50).toString() + "px");
-	   
-	   $('#toolFullscreen').addClass("toolFullscreenSelected");
-	   
-	   full_screen = 1;
+        $('#navCube').css("left", (WIDTH - 175).toString() + "px");
+        $('#navCube').css("top", "-70px");
+        $('#NimbusContext').css("margin-top","0px");
 
-   } else {
-	   cancelFullScreen();
-	   WIDTH = 800;
-	   HEIGHT = 600;
-	   $container.css("width", 800);
-	   $container.css("height", 600);
-	   renderer.setSize( WIDTH, HEIGHT);
+        $('#gotoHome').css("left", (WIDTH - 110).toString() + "px");
+        $('#gotoHome').css("top", "15px");
 
-	   $('#NimbusContext').css("margin-top","80px");
-	   $('#navCube').css("left", "625px");
-	   $('#navCube').css("top", "180px");
-	   $('#gotoHome').css("left", "690px");
-	   $('#gotoHome').css("top", "265px");	   
-	  $('#toolContainer').css("position","absolute");
-	   $('#toolContainer').css("width","45");
-	   $('#toolContainer').css("left","747px");
+        $('#autodeskattrib').css("left", (WIDTH - 110).toString() + "px");
+        $('#autodeskattrib').css("top", (HEIGHT - 50).toString() + "px");
 
-	   $('#autodeskattrib').css("left", "701px");
-	   $('#autodeskattrib').css("top", "828px");
 
-	   $('#nimbusattrib').css("top", "825px");
-	   $('#iowaattrib').css("top", "825px");
-	   $('#toolFullscreen').removeClass("toolFullscreenSelected");
-	   full_screen = 0;
-	   
-	   camera.aspect = 800 / 600;
-	   camera.updateProjectionMatrix();
-   }
+        $('#nimbusattrib').css("top", (HEIGHT - 50).toString() + "px");
+        $('#iowaattrib').css("top", (HEIGHT - 50).toString() + "px");
+
+        $('#toolFullscreen').addClass("toolFullscreenSelected");
+
+        full_screen = 1;
+
+    } else {
+        cancelFullScreen();
+        WIDTH = 800;
+        HEIGHT = 600;
+        $container.css("width", 800);
+        $container.css("height", 600);
+        renderer.setSize( WIDTH, HEIGHT);
+
+        $('#NimbusContext').css("margin-top","80px");
+        $('#navCube').css("left", "625px");
+        $('#navCube').css("top", "180px");
+        $('#gotoHome').css("left", "690px");
+        $('#gotoHome').css("top", "265px");	   
+        $('#toolContainer').css("position","absolute");
+        $('#toolContainer').css("width","45");
+        $('#toolContainer').css("left","747px");
+
+        $('#autodeskattrib').css("left", "701px");
+        $('#autodeskattrib').css("top", "828px");
+
+        $('#nimbusattrib').css("top", "825px");
+        $('#iowaattrib').css("top", "825px");
+        $('#toolFullscreen').removeClass("toolFullscreenSelected");
+        full_screen = 0;
+
+        camera.aspect = 800 / 600;
+        camera.updateProjectionMatrix();
+    }
 }
-	   
+
 function NimbusRun() 
 {
-	requestAnimationFrame( NimbusRun );
-	render();
+    requestAnimationFrame( NimbusRun );
+    render();
 }	
-
-function compoRender()
-{
-	shaderTimeClipper.uniforms.deltaTime.value = new Date().getTime() - startTime;
-			shaderFinalRender.wireframe = bWire;
-	// Pass 0 - Time Clipping
-	sceneScreenQuad.material = shaderTimeClipper;
-	renderer.render(sceneScreen, sceneScreenCamera, textureHoloframe, true);
-	
-	// Pass 1 - Phase Calculation
-	sceneScreenQuad.material = shaderPhaseCalculator;
-	renderer.render(sceneScreen, sceneScreenCamera, texturePhaseMap, true);
-	
-	// Pass 2 - Depth Calculation
-	sceneScreenQuad.material = shaderDepthCalculator;
-	renderer.render(sceneScreen, sceneScreenCamera, textureDepthMap, true);
-	
-	// Pass 3 - Normal Calculation
-	sceneScreenQuad.material = shaderNormalCalculator;
-	renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
-	
-	// Pass 4 - Final Render
-
-	renderer.render(scene, camera);
-
-}
 
 function render() 
 {	
-
-
-	//controls._rotateEnd = navcontrols._rotateEnd;
-
-				
-
     controls.update();	
     updateHomeTraversal();
-	
-				
 
-//		if (0 == 0) {
-		navcam.position.x = camera.position.x;
-		navcam.position.y = camera.position.y;
-		navcam.position.z = camera.position.z;
-		
-		navcam.position.normalize().multiplyScalar(14);
-		navcam.rotation.x = camera.rotation.x;
-		navcam.rotation.y = camera.rotation.y;
-		navcam.rotation.z = camera.rotation.z;
-		
-		navcam.up.x = camera.up.x;
-		navcam.up.y = camera.up.y;		
-		navcam.up.z = camera.up.z;		
-		
-		navcam.updateProjectionMatrix();
-		navcontrols.target.set( 0, 0, 0 );
-		navcontrols.update();
+    navcam.position.x = camera.position.x;
+    navcam.position.y = camera.position.y;
+    navcam.position.z = camera.position.z;
 
-		//
-//	}
-	
+    navcam.position.normalize().multiplyScalar(14);
+    navcam.rotation.x = camera.rotation.x;
+    navcam.rotation.y = camera.rotation.y;
+    navcam.rotation.z = camera.rotation.z;
 
-	
-	renderer.clear();	
-	navrenderer.clear();
-	
-	compoRender();
-	navrenderer.render( navscene, navcam );			
-	// Pass Debug - Render texture to screen for debugging
-	//sceneScreenQuad.material = shaderTextureDisplay;
-	//renderer.render(sceneScreen, sceneScreenCamera);
-	
-	//stats.update();
+    navcam.up.x = camera.up.x;
+    navcam.up.y = camera.up.y;		
+    navcam.up.z = camera.up.z;		
+
+    navcam.updateProjectionMatrix();
+    navcontrols.target.set( 0, 0, 0 );
+    navcontrols.update();
+
+    renderer.clear();	
+    navrenderer.clear();
+
+    holoimage.draw(scene, camera);
+    navrenderer.render( navscene, navcam );			
+
+    // Pass Debug - Render texture to screen for debugging
+    //sceneScreenQuad.material = shaderTextureDisplay;
+    //renderer.render(sceneScreen, sceneScreenCamera);
+    //stats.update();
 }
