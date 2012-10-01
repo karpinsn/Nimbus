@@ -1,3 +1,4 @@
+var Nimbus = Nimbus || { Revision: 1 };
 var container, navCube;;
 var stats;
 
@@ -139,7 +140,7 @@ function NimbusInit()
 	
 	//	Retrieve the data to display
 	var data = getUrlVars()["data"];
-	holoimage = new TimeClippedHoloimage(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
+	holoimage = new Nimbus.HoloimageTimeClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
 	
     // -----------------------------------------------------------------
     // Init camera

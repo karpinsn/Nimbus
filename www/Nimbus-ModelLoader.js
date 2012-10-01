@@ -163,6 +163,8 @@ Nimbus.HoloimageTimeClip = function ( textureWidth, textureHeight, data )
         sceneScreenQuad.material = shaderNormalCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
 
+		scene.mesh.material = shaderFinalRender;
+		
         // Pass 4 - Final Render
         renderer.render(scene, camera);
     };
