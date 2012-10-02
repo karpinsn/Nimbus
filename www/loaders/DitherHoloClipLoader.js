@@ -59,6 +59,19 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
         format: THREE.RGBFormat
             });
 
+	var uniformsTextureDisplay = {
+		image: {type: "t", 
+				value: 0,
+				texture: textureHoloframe
+				}
+	};
+
+	var shaderTextureDisplay = new THREE.ShaderMaterial({
+		uniforms: uniformsTextureDisplay,
+		vertexShader: loadShader('./shaders/TextureDisplay.vert'),
+		fragmentShader: loadShader('./shaders/TextureDisplay.frag')
+	});
+			
     var uniformsTimeClipper = {
         textureOverTime: {	type: "t", 
                              value: 0,		
@@ -106,7 +119,7 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
     };
 
     var shaderGaussianFilterV = new THREE.ShaderMaterial({
-        uniforms: uniformsGaussianFilterH,
+        uniforms: uniformsGaussianFilterV,
         vertexShader: loadShader('./shaders/Gaussian5x5Vertical.vert'),
         fragmentShader: loadShader('./shaders/Gaussian5x5.frag')
     });
@@ -231,6 +244,9 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
 
         // Pass 6 - Final Render
         renderer.render(scene, camera);
+		
+		//sceneScreenQuad.material = shaderTextureDisplay;
+		//renderer.render(sceneScreen, sceneScreenCamera);
     };
 };
 
