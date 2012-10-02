@@ -143,7 +143,7 @@ Nimbus.HoloimageTimeClip = function ( textureWidth, textureHeight, data )
     //  Used for time clipping (animation)
     var startTime = new Date().getTime();
 
-    this.draw = function(scene, camera)
+    this.draw = function ( scene, camera, mesh )
     {
         shaderTimeClipper.uniforms.deltaTime.value = new Date().getTime() - startTime;
 
@@ -163,7 +163,7 @@ Nimbus.HoloimageTimeClip = function ( textureWidth, textureHeight, data )
         sceneScreenQuad.material = shaderNormalCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
 
-		scene.mesh.material = shaderFinalRender;
+		mesh.material = shaderFinalRender;
 		
         // Pass 4 - Final Render
         renderer.render(scene, camera);

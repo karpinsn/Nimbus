@@ -4,6 +4,7 @@ var stats;
 
 var startTime;
 
+var mesh;
 var camera, controls, scene, renderer, composer, controls, navscene, navcam, navrenderer, navcontrols;;
 var sceneScreen, sceneScreenCamera, sceneScreenQuad;
 var full_screen = 0;
@@ -190,7 +191,7 @@ function NimbusInit()
     // -----------------------------------------------------------------		
     scene = new THREE.Scene();
     var width = 2, height = 2, segmentsWidth = 256, segmentsHeight = 256, depth = 2;
-    var mesh = new THREE.Mesh(
+    mesh = new THREE.Mesh(
             new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
             shaderFinalRender 
             );
@@ -528,7 +529,7 @@ function render()
     renderer.clear();	
     navrenderer.clear();
 
-    holoimage.draw(scene, camera);
+    holoimage.draw(scene, camera, mesh);
     navrenderer.render( navscene, navcam );			
 
     // Pass Debug - Render texture to screen for debugging
