@@ -79,13 +79,12 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
     });
 
     var uniformsGaussianFilterH = {
-        width: {type: "f", value: textureWidth}
-               height: {type: "f", value: textureHeight}
-                       holovideoFrame: {	type: "t",
+        width: {type: "f", value: textureWidth},
+               height: {type: "f", value: textureHeight},
+                       image: {	type: "t",
                                            value: 0,
                                            texture: texturePackedHoloframe
                                        },
-
                            depthWrite: false
     };
 
@@ -96,9 +95,9 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
     });
 
     var uniformsGaussianFilterV = {
-        width: {type: "f", value: textureWidth}
-               height: {type: "f", value: textureHeight}
-                       holovideoFrame: {	type: "t",
+        width: {type: "f", value: textureWidth},
+               height: {type: "f", value: textureHeight},
+                       image: {	type: "t",
                                            value: 0,
                                            texture: textureSmoothedHoloframe
                                        },
@@ -190,10 +189,9 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
     sceneScreenCamera.position.z = 1;
 
     var sceneScreen = new THREE.Scene();
-    var sceneScreenPlane = new THREE.PlaneGeometry(2, 2, 1, 1);
-    var sceneScreenQuad = new THREE.Mesh(sceneScreenPlane, shaderPhaseCalculator);
+    var sceneScreenPlane = new Nimbus.ScreenQuad();
+	var sceneScreenQuad = new THREE.Mesh(sceneScreenPlane, shaderPhaseCalculator);
     sceneScreenQuad.doubleSided = true;
-    sceneScreenQuad.scale.y = -1;
 
     sceneScreen.add(sceneScreenQuad);
     sceneScreen.add(sceneScreenCamera);  

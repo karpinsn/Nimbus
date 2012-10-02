@@ -1,10 +1,10 @@
-var Nimbus = Nimbus || { Revision: 1 };
+var Nimbus = Nimbus || { Revision: 2 };
 
-var container, navCube;;
+var container;
 var stats;
 
 var mesh;
-var camera, controls, scene, renderer, composer, controls, navscene, navcam, navrenderer, navcontrols;;
+var camera, controls, scene, renderer, composer, controls;
 var sceneScreen, sceneScreenCamera, sceneScreenQuad;
 var full_screen = 0;
 
@@ -20,6 +20,7 @@ var HOME_STEPS = 30;
 var homeFrame = 0;
 
 var holoimage;
+var navCube;
 
 var shaderFinalRender;
 
@@ -31,7 +32,6 @@ var WIDTH = 800,
 
 var TEXTURE_WIDTH = 256, TEXTURE_HEIGHT = 256;
 
-var NAV_WIDTH = 256, NAV_HEIGHT = 256;
 // set some camera attributes
 var VIEW_ANGLE = 45,
     ASPECT = 400 / 300,
@@ -101,16 +101,10 @@ function NimbusInit()
     // Init renderer
     // -----------------------------------------------------------------
     $container = $('#NimbusContext');
-    $navCube = $('#navCube');
 
     renderer = new THREE.WebGLRenderer();
-    navrenderer = new THREE.WebGLRenderer();
 
     $container.append(renderer.domElement);
-    $navCube.append(navrenderer.domElement);
-
-    navrenderer.setSize(NAV_WIDTH,NAV_HEIGHT);
-    navrenderer.autoClear = false;
 
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColorHex(0x000000, 1.0);	
@@ -139,18 +133,17 @@ function NimbusInit()
 	
 	//	Retrieve the data to display
 	var data = getUrlVars()["data"];
-	//holoimage = new Nimbus.HoloimageTimeClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
-	holoimage = new Nimbus.DitherHoloimageTimeClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
+	//holoimage = new Nimbus.HoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
+	holoimage = new Nimbus.DitherHoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
+	
+	navCube = new Nimbus.Navcube();
+	navCube.init();
 	
     // -----------------------------------------------------------------
     // Init camera
     // -----------------------------------------------------------------	
     camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
     camera.position.z = 4;
-
-    navcam = new THREE.PerspectiveCamera(VIEW_ANGLE, 1, NEAR, FAR);
-    navcam.position.z = 14;
-
 
     // -----------------------------------------------------------------
     // Init controls
@@ -170,20 +163,6 @@ function NimbusInit()
 
     controls.keys = [ 65, 83, 68 ];
 
-    navcontrols = new THREE.TrackballControls( navcam, navrenderer.domElement );
-    navcontrols.rotateSpeed = 0.5;
-
-    navcontrols.noZoom = true;
-    navcontrols.noPan = true;
-    navcontrols.noRotate = true;
-
-    navcontrols.staticMoving = false;
-    navcontrols.rotateSpeed = 1.0;
-    navcontrols.dynamicDampingFactor = 0.3;
-
-    navcontrols.minDistance = 1 * 1.1;
-    navcontrols.maxDistance = 1 * 100;
-
     // -----------------------------------------------------------------
     // Init scene
     // -----------------------------------------------------------------		
@@ -193,31 +172,6 @@ function NimbusInit()
             new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
             shaderFinalRender 
             );
-
-    navscene = new THREE.Scene();
-    var navmaterial = new THREE.MeshNormalMaterial({shading: THREE.SmoothShading, transparemt: true});
-    var navmesh = new THREE.Mesh(
-            new THREE.CubeGeometry(width, height, depth), navmaterial
-            );		
-    //////////////////
-    var navmaterials = [];
-    for (var i=0; i<6; i++) {
-        var img = new Image();
-        img.src = i + '.png';
-        var tex = new THREE.Texture(img);
-        img.tex = tex;
-        img.onload = function() {
-            this.tex.needsUpdate = true;
-        };
-        var mat = new THREE.MeshBasicMaterial({color: 0xffffff, map: tex});
-        navmaterials.push(mat);
-    }
-    var cubeGeo = new THREE.CubeGeometry(width,height,depth,1,1,1, navmaterials);
-    var cube = new THREE.Mesh(cubeGeo, new THREE.MeshFaceMaterial());	
-    navscene.add(cube);
-    navscene.add(navcam);
-    navrenderer.setSize(NAV_WIDTH, NAV_HEIGHT);
-    navrenderer.setClearColorHex(0x000000, 0.0);	
 
     // add the mesh to the scene
     scene.add(mesh);
@@ -254,10 +208,7 @@ function onWindowResize( event )
 
     camera.radius = ( width + height ) / 4;
  
-    navrenderer.setSize(NAV_WIDTH,NAV_HEIGHT);
-    navcam.aspect = 1;
-    navcam.updateProjectionMatrix();
-    navcam.radius = ( 200 ) / 4;	
+	navCube.windowResize();
 }
 
 function doPan() {
@@ -505,28 +456,10 @@ function render()
     controls.update();	
     updateHomeTraversal();
 
-    navcam.position.x = camera.position.x;
-    navcam.position.y = camera.position.y;
-    navcam.position.z = camera.position.z;
-
-    navcam.position.normalize().multiplyScalar(14);
-    navcam.rotation.x = camera.rotation.x;
-    navcam.rotation.y = camera.rotation.y;
-    navcam.rotation.z = camera.rotation.z;
-
-    navcam.up.x = camera.up.x;
-    navcam.up.y = camera.up.y;		
-    navcam.up.z = camera.up.z;		
-
-    navcam.updateProjectionMatrix();
-    navcontrols.target.set( 0, 0, 0 );
-    navcontrols.update();
-
     renderer.clear();	
-    navrenderer.clear();
 
     holoimage.draw(scene, camera, mesh);
-    navrenderer.render( navscene, navcam );			
+	navCube.render(camera);
 
     // Pass Debug - Render texture to screen for debugging
     //sceneScreenQuad.material = shaderTextureDisplay;

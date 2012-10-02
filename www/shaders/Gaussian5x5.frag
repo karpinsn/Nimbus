@@ -11,16 +11,15 @@
 precision highp float;
 
 uniform sampler2D image;
-uniform float kernel[5];
 
 varying vec2 fragTexCoordOffset[5];
  
 void main(void)
 {
     gl_FragColor = vec4(0.0);
-    gl_FragColor += texture2D(image, fragTexCoordOffset[ 0])*kernel[ 0];
-    gl_FragColor += texture2D(image, fragTexCoordOffset[ 1])*kernel[ 1];
-    gl_FragColor += texture2D(image, fragTexCoordOffset[ 2])*kernel[ 2];
-    gl_FragColor += texture2D(image, fragTexCoordOffset[ 3])*kernel[ 3];
-    gl_FragColor += texture2D(image, fragTexCoordOffset[ 4])*kernel[ 4];
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 0])*.1336;
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 1])*.2292;
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 2])*.2744;
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 3])*.2292;
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 4])*.1336;
 }

@@ -75,7 +75,7 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
                       texture: texturePhaseMap	
                   },
 
-        width: {type: "f", value: 256.0},
+        width: {type: "f", value: textureWidth},
         depthWrite: false
     };
 
@@ -91,8 +91,8 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
                       texture: textureDepthMap	
                   },
 
-        width: {type: "f", value: 256.0},
-        height: {type: "f", value: 256.0},
+        width: {type: "f", value: textureWidth},
+        height: {type: "f", value: textureHeight},
         depthWrite: false
     };
 
@@ -132,10 +132,9 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
     sceneScreenCamera.position.z = 1;
 
     var sceneScreen = new THREE.Scene();
-    var sceneScreenPlane = new THREE.PlaneGeometry(2, 2, 1, 1);
+    var sceneScreenPlane = new Nimbus.ScreenQuad();
     var sceneScreenQuad = new THREE.Mesh(sceneScreenPlane, shaderPhaseCalculator);
     sceneScreenQuad.doubleSided = true;
-    sceneScreenQuad.scale.y = -1;
 
     sceneScreen.add(sceneScreenQuad);
     sceneScreen.add(sceneScreenCamera);  
