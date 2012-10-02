@@ -1,7 +1,7 @@
 Nimbus.DitherHoloimageTimeClip = function ( textureWidth, textureHeight, data )
 {
 	//  Textures used by the Holoimage model
-	var texturePackedHoloframe = new Three.WebGLRenderTarget(
+	var texturePackedHoloframe = new THREE.WebGLRenderTarget(
 		textureWidth,
 		textureHeight,
 		{	minFilter: THREE.LinearFilter, 
@@ -9,7 +9,7 @@ Nimbus.DitherHoloimageTimeClip = function ( textureWidth, textureHeight, data )
 			format: THREE.RGBFormat
 		});
 	
-	var textureDitheredHoloframe = new Three.WebGLRenderTarget(
+	var textureDitheredHoloframe = new THREE.WebGLRenderTarget(
 		textureWidth,
 		textureHeight,
 		{	minFilter: THREE.LinearFilter, 
@@ -17,7 +17,7 @@ Nimbus.DitherHoloimageTimeClip = function ( textureWidth, textureHeight, data )
 			format: THREE.RGBFormat
 		});
 		
-	var textureSmoothedHoloframe = new Three.WebGLRenderTarget(
+	var textureSmoothedHoloframe = new THREE.WebGLRenderTarget(
 		textureWidth,
 		textureHeight,
 		{	minFilter: THREE.LinearFilter, 
@@ -102,7 +102,7 @@ Nimbus.DitherHoloimageTimeClip = function ( textureWidth, textureHeight, data )
 		depthWrite: false
 	};
 	
-	var shaderGaussianFilterH = new THREE.ShaderMaterial({
+	var shaderGaussianFilterV = new THREE.ShaderMaterial({
 		uniforms: uniformsGaussianFilterH,
 		vertexShader: loadShader('./shaders/Gaussian5x5Vertical.vert'),
 		fragmentShader: loadShader('./shaders/Gaussian5x5.frag')
@@ -213,21 +213,21 @@ Nimbus.DitherHoloimageTimeClip = function ( textureWidth, textureHeight, data )
 		sceneScreenQuad.material = shaderGaussianFilterV;
 		renderer.render(sceneScreen, sceneScreenCamera, textureHoloframe, true);
 		
-        // Pass 1 - Phase Calculation
+        // Pass 3 - Phase Calculation
         sceneScreenQuad.material = shaderPhaseCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, texturePhaseMap, true);
 
-        // Pass 2 - Depth Calculation
+        // Pass 4 - Depth Calculation
         sceneScreenQuad.material = shaderDepthCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, textureDepthMap, true);
 
-        // Pass 3 - Normal Calculation
+        // Pass 5 - Normal Calculation
         sceneScreenQuad.material = shaderNormalCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
 
 		mesh.material = shaderFinalRender;
 		
-        // Pass 4 - Final Render
+        // Pass 6 - Final Render
         renderer.render(scene, camera);
     };
 };

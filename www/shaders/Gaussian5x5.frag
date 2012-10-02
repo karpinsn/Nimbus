@@ -1,5 +1,3 @@
-#version 130
-
 /*
   5x5 Gaussian Filter
 
@@ -15,16 +13,14 @@ precision highp float;
 uniform sampler2D image;
 uniform float kernel[5];
 
-in vec2 fragTexCoordOffset[5];
-
-out vec4 filteredImage;
+varying vec2 fragTexCoordOffset[5];
  
 void main(void)
 {
-    filteredImage = vec4(0.0);
-    filteredImage += texture2D(image, fragTexCoordOffset[ 0])*kernel[ 0];
-    filteredImage += texture2D(image, fragTexCoordOffset[ 1])*kernel[ 1];
-    filteredImage += texture2D(image, fragTexCoordOffset[ 2])*kernel[ 2];
-    filteredImage += texture2D(image, fragTexCoordOffset[ 3])*kernel[ 3];
-    filteredImage += texture2D(image, fragTexCoordOffset[ 4])*kernel[ 4];
+    gl_FragColor = vec4(0.0);
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 0])*kernel[ 0];
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 1])*kernel[ 1];
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 2])*kernel[ 2];
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 3])*kernel[ 3];
+    gl_FragColor += texture2D(image, fragTexCoordOffset[ 4])*kernel[ 4];
 }

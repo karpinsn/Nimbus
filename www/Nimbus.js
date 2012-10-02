@@ -139,7 +139,8 @@ function NimbusInit()
 	
 	//	Retrieve the data to display
 	var data = getUrlVars()["data"];
-	holoimage = new Nimbus.HoloimageTimeClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
+	//holoimage = new Nimbus.HoloimageTimeClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
+	holoimage = new Nimbus.DitherHoloimageTimeClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
 	
     // -----------------------------------------------------------------
     // Init camera
