@@ -1,8 +1,7 @@
 var Nimbus = Nimbus || { Revision: 1 };
+
 var container, navCube;;
 var stats;
-
-var startTime;
 
 var mesh;
 var camera, controls, scene, renderer, composer, controls, navscene, navcam, navrenderer, navcontrols;;
@@ -22,8 +21,7 @@ var homeFrame = 0;
 
 var holoimage;
 
-var shaderTextureDisplay, shaderTimeClipper, shaderPhaseCalculator, shaderDepthCalculator, shaderNormalCalculator, shaderFinalRender;
-var textureHoloframe, texturePhaseMap, textureFilteredPhaseMap, textureDepthMap, textureNormalMap;
+var shaderFinalRender;
 
 var mouse = { x: 0, y: 0 }, INTERSECTED;
 
@@ -149,7 +147,6 @@ function NimbusInit()
     camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
     camera.position.z = 4;
 
-
     navcam = new THREE.PerspectiveCamera(VIEW_ANGLE, 1, NEAR, FAR);
     navcam.position.z = 14;
 
@@ -227,8 +224,6 @@ function NimbusInit()
     scene.add(camera);
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColorHex(0x000000, 1.0);		
-
-    startTime = new Date().getTime();	
 
     renderInit = true;
 
