@@ -8,9 +8,8 @@ var camera, controls, scene, renderer, composer, controls;
 var sceneScreen, sceneScreenCamera, sceneScreenQuad;
 var full_screen = 0;
 
-
 var uiMode = 0;
-var bWire = true;
+var wireframeDisplay = false;
 
 var bHomeTraversal= false;
 
@@ -135,10 +134,12 @@ function NimbusInit()
 	var data = getUrlVars()["data"];
 	//holoimage = new Nimbus.HoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
 	holoimage = new Nimbus.DitherHoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
-	
+    
 	navCube = new Nimbus.Navcube();
 	navCube.init();
-	
+
+    
+
     // -----------------------------------------------------------------
     // Init camera
     // -----------------------------------------------------------------	
@@ -162,6 +163,34 @@ function NimbusInit()
     controls.dynamicDampingFactor = 0.3;
 
     controls.keys = [ 65, 83, 68 ];
+    
+    // -----------------------------------------------------------------
+    // Init UI
+    // -----------------------------------------------------------------
+    Nimbus.ui = { };  
+
+    //  Control Tools
+    var controlGroup = new Nimbus.ButtonGroup(); 
+    var toolRotate = new Nimbus.Button('toolRotate', controls.setRotate);
+    controlGroup.addButton(toolRotate);
+    Nimbus.ui.toolRotate = toolRotate; 
+
+    var toolPan = new Nimbus.Button('toolPan', controls.setPan);
+    controlGroup.addButton(toolPan);
+    Nimbus.ui.toolPan = toolPan;
+
+    var toolZoom = new Nimbus.Button('toolZoom', controls.setZoom);
+    controlGroup.addButton(toolZoom);
+    Nimbus.ui.toolZoom = toolZoom;
+
+    Nimbus.ui.divider1 = new Nimbus.ButtonDivider();
+
+    //  Render Tools
+    Nimbus.ui.toolWireframe = new Nimbus.Button('toolWireframe', function() { wireframeDisplay = !wireframeDisplay; } );
+    Nimbus.ui.divider2 = new Nimbus.ButtonDivider();
+
+    //  Fullscreen Tools
+    Nimbus.ui.toolFullscreen = new Nimbus.Button('toolFullscreen', myfullscreen);
 
     // -----------------------------------------------------------------
     // Init scene
@@ -210,37 +239,6 @@ function onWindowResize( event )
  
 	navCube.windowResize();
 }
-
-function doPan() {
-    $("#toolPan").addClass("toolSelected");
-    $("#toolRotate").removeClass("toolSelected");
-    $("#toolZoomIn").removeClass("toolSelected");
-    $("#toolZoomOut").removeClass("toolSelected");
-    controls.setPan();
-    $("#toolPan").toggleClass("toolSelected");
-    uiMode = 1;
-
-} 
-
-function doRotate() {
-    $("#toolPan").removeClass("toolSelected");
-    $("#toolRotate").addClass("toolSelected");
-    $("#toolZoomIn").removeClass("toolSelected");
-    $("#toolZoomOut").removeClass("toolSelected");
-    controls.setRotate();
-    $("#toolRotate").toggleClass("toolSelected");
-    uiMode = 0;
-} 
-
-function doZoomIn() {
-    $("#toolPan").removeClass("toolSelected");
-    $("#toolRotate").removeClass("toolSelected");
-    $("#toolZoomIn").addClass("toolSelected");
-    $("#toolZoomOut").removeClass("toolSelected");
-    controls.setZoom();
-    $("#toolZoomIn").toggleClass("toolSelected");
-    uiMode = 2;
-} 
 
 function gotoHome() {
 
@@ -306,13 +304,6 @@ function updateHomeTraversal() {
         }	
     }
 }
-
-function doZoomOut() {
-    $("#toolPan").removeClass("toolSelected");
-    $("#toolRotate").removeClass("toolSelected");
-    $("#toolZoomIn").removeClass("toolSelected");
-    $("#toolZoomOut").addClass("toolSelected");
-} 
 
 function doWireframe() {
     $("#toolWireframe").toggleClass("toolSelected");
@@ -380,7 +371,7 @@ document.addEventListener("webkitfullscreenchange", function () {
 }, false);
 
 
-function myfullscreen( value )
+function myfullscreen()
 {
     if (full_screen == 0) {
         requestFullScreen(document.getElementById("NimbusContext"));
@@ -460,9 +451,4 @@ function render()
 
     holoimage.draw(scene, camera, mesh);
 	navCube.render(camera);
-
-    // Pass Debug - Render texture to screen for debugging
-    //sceneScreenQuad.material = shaderTextureDisplay;
-    //renderer.render(sceneScreen, sceneScreenCamera);
-    //stats.update();
 }

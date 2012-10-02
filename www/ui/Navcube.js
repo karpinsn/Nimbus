@@ -42,7 +42,7 @@ Nimbus.Navcube = function()
 		//////////////////
 		var navmaterials = [];
 		for (var i=0; i<6; i++) {
-			navmaterials.push(new THREE.MeshBasicMaterial({color: 0xffffff, map: THREE.ImageUtils.loadTexture(i + '.png', THREE.UVMapping)}));
+			navmaterials.push(new THREE.MeshBasicMaterial({color: 0xffffff, map: THREE.ImageUtils.loadTexture('images/navcube/' + i + '.png', THREE.UVMapping)}));
 		}
 		var cubeGeo = new THREE.CubeGeometry(width,height,depth,1,1,1, navmaterials);
 		var cube = new THREE.Mesh(cubeGeo, new THREE.MeshFaceMaterial());	

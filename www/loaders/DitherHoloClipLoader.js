@@ -241,7 +241,8 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
         renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
 
         mesh.material = shaderFinalRender;
-
+		shaderFinalRender.wireframe = wireframeDisplay;
+		
         // Pass 6 - Final Render
         renderer.render(scene, camera);
 		

@@ -142,16 +142,12 @@ background-image: url('../images/drag.png');
 background-image: url('../images/zoomrect.png');
 }
 
-.toolZoomIn {
-background-image: url('../images/zoomin.png');
+.toolZoom {
+background-image: url('../images/zoom.png');
 }
 
 .toolWireframe {
 background-image: url('../images/wireframe.png');
-}
-
-.toolZoomOut {
-background-image: url('../images/zoomout.png');
 }
 
 .toolFullscreen {
