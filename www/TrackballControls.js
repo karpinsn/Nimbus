@@ -1,4 +1,4 @@
-THREE.TrackballControls2 = function ( object, domElement, syncObject ) {
+Nimbus.TrackballControls = function ( object, domElement, syncObject ) {
 
 	THREE.EventTarget.call( this );
 

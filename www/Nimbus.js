@@ -149,7 +149,7 @@ function NimbusInit()
     // -----------------------------------------------------------------
     // Init controls
     // -----------------------------------------------------------------
-    controls = new THREE.TrackballControls2( camera, renderer.domElement, this );
+    controls = new Nimbus.TrackballControls( camera, renderer.domElement, this );
 
     controls.target.set( 0, 0, 0 );
     controls.rotateSpeed = 0.5;
@@ -250,7 +250,7 @@ function gotoHome() {
         incPosition = new THREE.Vector3();
         incRotation = new THREE.Vector3();
         incUp       = new THREE.Vector3();
-        incTarget       = new THREE.Vector3();
+        incTarget   = new THREE.Vector3();
 
 
         incPosition.x = -camera.position.x / HOME_STEPS;
@@ -305,23 +305,6 @@ function updateHomeTraversal() {
     }
 }
 
-function doWireframe() {
-    $("#toolWireframe").toggleClass("toolSelected");
-    bWire = !bWire;
-} 
-
-function glowOn(d) {
-    var name = "#" + d.id.toString();
-    $(name).toggleClass("toolSelected");
-    $(name).addClass("toolHover");
-}
-
-function glowOff(d) {
-    var name = "#" + d.id.toString();
-    $(name).toggleClass("toolSelected");
-    $(name).removeClass("toolHover");
-}
-
 function glowOnHome(d) {
     var name = "#" + d.id.toString();
     $(name).addClass("homeHover");
@@ -358,7 +341,7 @@ document.addEventListener("mozfullscreenchange", function () {
     if (document.mozFullScreen == false) {
         full_screen = 1;
         myfullscreen('1');
-        $("#toolFullscreen").toggleClass("toolSelected");
+        //$("#toolFullscreen").toggleClass("toolSelected");
     }
 }, false);
 
@@ -367,7 +350,7 @@ document.addEventListener("webkitfullscreenchange", function () {
         full_screen = 1;
         myfullscreen('1');
     }
-    $("#toolFullscreen").toggleClass("toolSelected");
+    //$("#toolFullscreen").toggleClass("toolSelected");
 }, false);
 
 
@@ -402,7 +385,7 @@ function myfullscreen()
         $('#nimbusattrib').css("top", (HEIGHT - 50).toString() + "px");
         $('#iowaattrib').css("top", (HEIGHT - 50).toString() + "px");
 
-        $('#toolFullscreen').addClass("toolFullscreenSelected");
+        //$('#toolFullscreen').addClass("toolFullscreenSelected");
 
         full_screen = 1;
 
@@ -428,7 +411,7 @@ function myfullscreen()
 
         $('#nimbusattrib').css("top", "825px");
         $('#iowaattrib').css("top", "825px");
-        $('#toolFullscreen').removeClass("toolFullscreenSelected");
+        //$('#toolFullscreen').removeClass("toolFullscreenSelected");
         full_screen = 0;
 
         camera.aspect = 800 / 600;

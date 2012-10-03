@@ -50,10 +50,22 @@ background: url(../images/btn_toggle_smallscreen.png) no-repeat left top;
 .iowaattrib {
 position: absolute;
 left: 9px;
-top: 825px;
+top: 831px;
 background: url(../images/Iowa.png) no-repeat left top;
 display: block;
-width: 160px;
+width: 177px;
+float: right;
+height: 16px;
+cursor: pointer;
+}
+
+.vracattrib {
+position: absolute;
+left: 190px;
+top: 826px;
+background: url(../images/VRAC.png) no-repeat left top;
+display: block;
+width: 105px;
 float: right;
 height: 30px;
 cursor: pointer;
@@ -61,7 +73,7 @@ cursor: pointer;
 
 .nimbusattrib {
 position: absolute;
-left: 170px;
+left: 288px;
 top: 825px;
 background: url(../images/Nimbus.png) no-repeat left top;
 display: block;
