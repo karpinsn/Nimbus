@@ -133,8 +133,9 @@ function NimbusInit()
 	//	Retrieve the data to display
 	var data = getUrlVars()["data"];
 	//holoimage = new Nimbus.HoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
-	holoimage = new Nimbus.DitherHoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
-    
+	//holoimage = new Nimbus.DitherHoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
+    holoimage = Nimbus.LoadModel(data);
+
 	navCube = new Nimbus.Navcube();
 	navCube.init();
 
