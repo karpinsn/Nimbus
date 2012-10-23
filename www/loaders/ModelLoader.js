@@ -14,7 +14,7 @@ Nimbus.LoadModel = function(data)
     else if(-1 != data.search(websocketRegex))
     {
         //return new Nimbus.HoloWebSocket(512.0, 512.0, data);
-		return new Nimbus.HoloDepthWebSocket(512.0, 512.0, data);
+		return new Nimbus.HoloDepthWebSocket(576.0, 576.0, data);
     }
 }
 

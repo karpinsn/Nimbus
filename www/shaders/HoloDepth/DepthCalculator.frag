@@ -5,7 +5,7 @@ varying vec2 fragUV;
 
 void main()
 {	
-	float fringeFrequency = 12.0;            		// Frequency of the fringe in Hz
+	float fringeFrequency = 16.0;            		// Frequency of the fringe in Hz
 	float pi = 3.14159265; 							// Mmmmmm PI
 	float phaseA = texture2D(phaseMap, fragUV).x;
 			
