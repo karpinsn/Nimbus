@@ -1,4 +1,4 @@
-Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
+Nimbus.HoloDepthWebSocket = function ( textureWidth, textureHeight, data )
 {
     var holoframe = new Image();
     var websocket = new WebSocket(data, "Antenna-BaseStation");
@@ -67,8 +67,8 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 
     var shaderPhaseCalculator = new THREE.ShaderMaterial({
         uniforms: uniformsPhaseCalculator,
-        vertexShader: loadShader('./shaders/PhaseCalculator.vert'),
-        fragmentShader: loadShader('./shaders/PhaseCalculator.frag')
+        vertexShader: loadShader('./shaders/HoloDepth/PhaseCalculator.vert'),
+        fragmentShader: loadShader('./shaders/HoloDepth/PhaseCalculator.frag')
     });
 
     var uniformsDepthCalculator = {
@@ -83,8 +83,8 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 
     var shaderDepthCalculator = new THREE.ShaderMaterial({
         uniforms: uniformsDepthCalculator,
-        vertexShader: loadShader('./shaders/DepthCalculator.vert'),
-        fragmentShader: loadShader('./shaders/DepthCalculator.frag')
+        vertexShader: loadShader('./shaders/HoloDepth/DepthCalculator.vert'),
+        fragmentShader: loadShader('./shaders/HoloDepth/DepthCalculator.frag')
     });
 
     var uniformsNormalCalculator = {
