@@ -29,8 +29,6 @@ var mouse = { x: 0, y: 0 }, INTERSECTED;
 var WIDTH = 800,
     HEIGHT = 600;
 
-var TEXTURE_WIDTH = 256, TEXTURE_HEIGHT = 256;
-
 // set some camera attributes
 var VIEW_ANGLE = 45,
     ASPECT = 400 / 300,
@@ -109,15 +107,6 @@ function NimbusInit()
     renderer.setClearColorHex(0x000000, 1.0);	
     renderer.autoClear = false;
 
-    // -----------------------------------------------------------------
-    // Init stats calculator
-    // -----------------------------------------------------------------
-    //stats = new Stats();
-    //stats.domElement.style.position = 'absolute';
-    //stats.domElement.style.bottom = '0px';
-    //stats.domElement.style.right = '0px';
-    //$container.append( stats.domElement );
-
     //	Events
     window.addEventListener( 'resize', onWindowResize, false );
 
@@ -132,8 +121,6 @@ function NimbusInit()
 	
 	//	Retrieve the data to display
 	var data = getUrlVars()["data"];
-	//holoimage = new Nimbus.HoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
-	//holoimage = new Nimbus.DitherHoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
     holoimage = Nimbus.LoadModel(data);
     //mesh = Nimbus.LoadModel(data);
 
@@ -198,7 +185,7 @@ function NimbusInit()
     // Init scene
     // -----------------------------------------------------------------		
     scene = new THREE.Scene();
-    var width = 2, height = 2, segmentsWidth = 256, segmentsHeight = 256, depth = 2;
+    var width = 2, height = 2, segmentsWidth = 576.0, segmentsHeight = 576.0, depth = 2;
     
     
     mesh = new THREE.Mesh(
@@ -436,9 +423,8 @@ function render()
 
     renderer.clear();	
     
-    //mesh.draw(scene, camera);
+    //mesh.draw(scene, camera, mesh);
     holoimage.draw(scene, camera, mesh);
-	//mesh.material.side = THREE.SingleSide;
 	//renderer.render( scene, camera );
 	navCube.render(camera);
 }

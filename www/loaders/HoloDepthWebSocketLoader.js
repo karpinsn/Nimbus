@@ -134,9 +134,6 @@ Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight
     sceneScreen.add(sceneScreenQuad);
     sceneScreen.add(sceneScreenCamera);  
 
-    dataLoaded = true; 
-    NimbusInitComplete();
-
     THREE.Geometry.call( this );
 
 	var ix, iz,
@@ -158,9 +155,7 @@ Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight
 			var y = iz * segment_height - height_half;
 
 			this.vertices.push( new THREE.Vector3( x, - y, 0 ) );
-
 		}
-
 	}
 
 	for ( iz = 0; iz < gridZ; iz ++ ) {
@@ -193,7 +188,7 @@ Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight
     dataLoaded = true; 
     NimbusInitComplete();
 
-    this.draw = function ( scene, camera )
+    this.draw = function ( scene, camera, mesh )
     {
         // Pass 1 - Phase Calculation
         sceneScreenQuad.material = shaderPhaseCalculator;
@@ -207,7 +202,7 @@ Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight
         sceneScreenQuad.material = shaderNormalCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
 
-        this.material = shaderFinalRender;
+        mesh.material = shaderFinalRender;
         shaderFinalRender.wireframe = wireframeDisplay;
 
         // Pass 4 - Final Render
