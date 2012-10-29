@@ -58,8 +58,7 @@ Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight
 
     var uniformsPhaseCalculator = {
         holovideoFrame: {	type: "t", 
-                            value: 0,	
-                            texture: textureHoloframe
+                            value: textureHoloframe
                         },
 
         depthWrite: false
@@ -73,8 +72,7 @@ Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight
 
     var uniformsDepthCalculator = {
         phaseMap: {type: "t", 
-                      value: 0,
-                      texture: texturePhaseMap	
+                      value: texturePhaseMap	
                   },
  
         depthWrite: false
@@ -88,8 +86,7 @@ Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight
 
     var uniformsNormalCalculator = {
         depthMap: { type: "t", 
-                      value: 0,
-                      texture: textureDepthMap	
+                      value: textureDepthMap	
                   },
 
         width: {type: "f", value: textureWidth},
@@ -105,18 +102,15 @@ Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight
 
     var uniformsFinalRender = {
         depthMap: {	type: "t", 
-                      value: 0,
-                      texture: textureDepthMap	
+                      value: textureDepthMap	
                   },
 
         normalMap: {type: "t", 
-                       value: 1,
-                       texture: textureNormalMap	
+                       value: textureNormalMap	
                    },
 
         holovideoFrame: {type: "t", 
-                            value: 2,
-                            texture: textureHoloframe					
+                            value: textureHoloframe					
                         },
 
         depthWrite: false
@@ -222,4 +216,4 @@ Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight
 };
 
 //  We are going to act like geometry so that we can get added to a scene
-Nimbus.HoloDepthWebSocketLoader.prototype = Object.create( THREE.Geometry.prototype );
+Nimbus.HoloDepthWebSocket.prototype = Object.create( THREE.Geometry.prototype );

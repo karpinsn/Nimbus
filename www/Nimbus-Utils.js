@@ -33,10 +33,10 @@ Nimbus.ScreenQuad = function()
 	var normal = new THREE.Vector3(0, 0, 1);
 	
 	//	Add the verticies for the quad
-	this.vertices.push(new THREE.Vertex(new THREE.Vector3(-1, -1, 0)));
-	this.vertices.push(new THREE.Vertex(new THREE.Vector3(1, -1, 0)));
-	this.vertices.push(new THREE.Vertex(new THREE.Vector3(1, 1, 0)));
-	this.vertices.push(new THREE.Vertex(new THREE.Vector3(-1, 1, 0)));
+	this.vertices.push(new THREE.Vector3(-1, -1, 0));
+	this.vertices.push(new THREE.Vector3(1, -1, 0));
+	this.vertices.push(new THREE.Vector3(1, 1, 0));
+	this.vertices.push(new THREE.Vector3(-1, 1, 0));
 	
 	//	Generate the quad face
 	var face = new THREE.Face4(0, 1, 2, 3);
@@ -54,5 +54,4 @@ Nimbus.ScreenQuad = function()
 	this.computeCentroids();
 };
 
-Nimbus.ScreenQuad.prototype = new THREE.Geometry();
-Nimbus.ScreenQuad.prototype.constructor = Nimbus.ScreenQuad;
+Nimbus.ScreenQuad.prototype = Object.create( THREE.Geometry.prototype );

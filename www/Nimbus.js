@@ -134,7 +134,8 @@ function NimbusInit()
 	var data = getUrlVars()["data"];
 	//holoimage = new Nimbus.HoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
 	//holoimage = new Nimbus.DitherHoloClip(TEXTURE_WIDTH, TEXTURE_HEIGHT, data);
-    mesh = Nimbus.LoadModel(data);
+    holoimage = Nimbus.LoadModel(data);
+    //mesh = Nimbus.LoadModel(data);
 
 	navCube = new Nimbus.Navcube();
 	navCube.init();
@@ -199,12 +200,12 @@ function NimbusInit()
     scene = new THREE.Scene();
     var width = 2, height = 2, segmentsWidth = 256, segmentsHeight = 256, depth = 2;
     
-    /*
+    
     mesh = new THREE.Mesh(
             new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
             shaderFinalRender 
             );
-    */
+    
     // add the mesh to the scene
     scene.add(mesh);
 
@@ -435,7 +436,9 @@ function render()
 
     renderer.clear();	
     
-    mesh.draw(scene, camera);
-    //holoimage.draw(scene, camera, mesh);
+    //mesh.draw(scene, camera);
+    holoimage.draw(scene, camera, mesh);
+	//mesh.material.side = THREE.SingleSide;
+	//renderer.render( scene, camera );
 	navCube.render(camera);
 }

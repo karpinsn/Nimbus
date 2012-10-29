@@ -58,8 +58,7 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 
     var uniformsPhaseCalculator = {
         holovideoFrame: {	type: "t", 
-                            value: 0,	
-							texture: textureHoloframe
+                            value: textureHoloframe
                         },
 
         depthWrite: false
@@ -73,8 +72,7 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 
     var uniformsDepthCalculator = {
         phaseMap: {type: "t", 
-                      value: 0,
-                      texture: texturePhaseMap	
+                      value: texturePhaseMap	
                   },
 
         width: {type: "f", value: textureWidth},
@@ -89,8 +87,7 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 
     var uniformsNormalCalculator = {
         depthMap: { type: "t", 
-                      value: 0,
-                      texture: textureDepthMap	
+                      value: textureDepthMap	
                   },
 
         width: {type: "f", value: textureWidth},
@@ -106,18 +103,15 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 
     var uniformsFinalRender = {
         depthMap: {	type: "t", 
-                      value: 0,
-                      texture: textureDepthMap	
+                      value: textureDepthMap	
                   },
 
         normalMap: {type: "t", 
-                       value: 1,
-                       texture: textureNormalMap	
+                       value: textureNormalMap	
                    },
 
         holovideoFrame: {type: "t", 
-                            value: 2,
-                            texture: textureHoloframe					
+                            value: textureHoloframe					
                         },
 
         depthWrite: false

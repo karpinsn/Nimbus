@@ -58,24 +58,10 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
                 magFilter: THREE.NearestFilter, 
         format: THREE.RGBFormat
             });
-
-	var uniformsTextureDisplay = {
-		image: {type: "t", 
-				value: 0,
-				texture: textureHoloframe
-				}
-	};
-
-	var shaderTextureDisplay = new THREE.ShaderMaterial({
-		uniforms: uniformsTextureDisplay,
-		vertexShader: loadShader('./shaders/TextureDisplay.vert'),
-		fragmentShader: loadShader('./shaders/TextureDisplay.frag')
-	});
 			
     var uniformsTimeClipper = {
         textureOverTime: {	type: "t", 
-                             value: 0,		
-                             texture: THREE.ImageUtils.loadTexture(data, THREE.UVMapping, function(){dataLoaded = true; NimbusInitComplete();})
+                             value: THREE.ImageUtils.loadTexture(data, THREE.UVMapping, function(){dataLoaded = true; NimbusInitComplete();})
                          },
 
         deltaTime: 			{type: "f", value: 0.2},
@@ -95,8 +81,7 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
         width: {type: "f", value: textureWidth},
                height: {type: "f", value: textureHeight},
                        image: {	type: "t",
-                                           value: 0,
-                                           texture: texturePackedHoloframe
+                                           value: texturePackedHoloframe
                                        },
                            depthWrite: false
     };
@@ -111,8 +96,7 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
         width: {type: "f", value: textureWidth},
                height: {type: "f", value: textureHeight},
                        image: {	type: "t",
-                                           value: 0,
-                                           texture: textureSmoothedHoloframe
+                                           value: textureSmoothedHoloframe
                                        },
 
                            depthWrite: false
@@ -126,8 +110,7 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
 
     var uniformsPhaseCalculator = {
         holovideoFrame: {	type: "t", 
-                            value: 0,
-                            texture: textureHoloframe						
+                            value: textureHoloframe						
                         },
 
         depthWrite: false
@@ -141,8 +124,7 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
 
     var uniformsDepthCalculator = {
         phaseMap: {type: "t", 
-                      value: 0,
-                      texture: texturePhaseMap	
+                      value: texturePhaseMap	
                   },
 
         width: {type: "f", value: textureWidth},
@@ -157,8 +139,7 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
 
     var uniformsNormalCalculator = {
         depthMap: { type: "t", 
-                      value: 0,
-                      texture: textureDepthMap	
+                      value: textureDepthMap	
                   },
 
         width: {type: "f", value: textureWidth},
@@ -174,18 +155,15 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
 
     var uniformsFinalRender = {
         depthMap: {	type: "t", 
-                      value: 0,
-                      texture: textureDepthMap	
+                      value: textureDepthMap	
                   },
 
         normalMap: {	type: "t", 
-                       value: 1,
-                       texture: textureNormalMap	
+                       value: textureNormalMap	
                    },
 
         holovideoFrame: {	type: "t", 
-                            value: 2,
-                            texture: textureHoloframe						
+                            value: textureHoloframe						
                         },
 
         depthWrite: false
@@ -245,9 +223,6 @@ Nimbus.DitherHoloClip = function ( textureWidth, textureHeight, data )
 		
         // Pass 6 - Final Render
         renderer.render(scene, camera);
-		
-		//sceneScreenQuad.material = shaderTextureDisplay;
-		//renderer.render(sceneScreen, sceneScreenCamera);
     };
 };
 

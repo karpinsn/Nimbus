@@ -36,9 +36,8 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
             });
 
     var uniformsTimeClipper = {
-        textureOverTime: {type: "t", 
-                             value: 0,		
-                             texture: THREE.ImageUtils.loadTexture(data, THREE.UVMapping, function(){dataLoaded = true; NimbusInitComplete();})
+        textureOverTime: {type: "t", 	
+                             value: THREE.ImageUtils.loadTexture(data, THREE.UVMapping, function(){dataLoaded = true; NimbusInitComplete();})
                          },
 
         deltaTime: 			{type: "f", value: 0.2},
@@ -56,8 +55,7 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
 
     var uniformsPhaseCalculator = {
         holovideoFrame: {	type: "t", 
-                            value: 0,
-                            texture: textureHoloframe						
+                            value: textureHoloframe						
                         },
 
         depthWrite: false
@@ -71,8 +69,7 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
 
     var uniformsDepthCalculator = {
         phaseMap: {type: "t", 
-                      value: 0,
-                      texture: texturePhaseMap	
+                      value: texturePhaseMap	
                   },
 
         width: {type: "f", value: textureWidth},
@@ -87,8 +84,7 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
 
     var uniformsNormalCalculator = {
         depthMap: { type: "t", 
-                      value: 0,
-                      texture: textureDepthMap	
+                      value: textureDepthMap	
                   },
 
         width: {type: "f", value: textureWidth},
@@ -104,18 +100,15 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
 
     var uniformsFinalRender = {
         depthMap: {	type: "t", 
-                      value: 0,
-                      texture: textureDepthMap	
+                      value: textureDepthMap	
                   },
 
         normalMap: {type: "t", 
-                       value: 1,
-                       texture: textureNormalMap	
+                       value: textureNormalMap	
                    },
 
         holovideoFrame: {type: "t", 
-                            value: 2,
-                            texture: textureHoloframe						
+                            value: textureHoloframe						
                         },
 
         depthWrite: false
@@ -145,7 +138,7 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
     this.draw = function ( scene, camera, mesh )
     {
         shaderTimeClipper.uniforms.deltaTime.value = new Date().getTime() - startTime;
-
+		
         // Pass 0 - Time Clipping
         sceneScreenQuad.material = shaderTimeClipper;
         renderer.render(sceneScreen, sceneScreenCamera, textureHoloframe, true);
