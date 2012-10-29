@@ -1,9 +1,9 @@
-Nimbus.HoloDepthWebSocket = function ( textureWidth, textureHeight, data )
+Nimbus.HoloDepthWebSocket = function (width, height, textureWidth, textureHeight, data )
 {
     var holoframe = new Image();
     var websocket = new WebSocket(data, "Antenna-BaseStation");
-	
-	    //  Textures used by the Holoimage model
+
+    //  Textures used by the Holoimage model
     var textureHoloframe = new THREE.Texture(holoframe);
     websocket.onopen = function()
     {
@@ -22,12 +22,12 @@ Nimbus.HoloDepthWebSocket = function ( textureWidth, textureHeight, data )
 
         holoframe.onload = function()
         {
-			//	Once we update the texture, revoke the URL so it can be reused
-			textureHoloframe.onUpdate = function() { window.webkitURL.revokeObjectURL(url); };
-			textureHoloframe.needsUpdate = true;
+            //	Once we update the texture, revoke the URL so it can be reused
+            textureHoloframe.onUpdate = function() { window.webkitURL.revokeObjectURL(url); };
+            textureHoloframe.needsUpdate = true;
         }
 
-		holoframe.src = url;
+        holoframe.src = url;
     }
 
     var texturePhaseMap = new THREE.WebGLRenderTarget(
@@ -59,7 +59,7 @@ Nimbus.HoloDepthWebSocket = function ( textureWidth, textureHeight, data )
     var uniformsPhaseCalculator = {
         holovideoFrame: {	type: "t", 
                             value: 0,	
-							texture: textureHoloframe
+                            texture: textureHoloframe
                         },
 
         depthWrite: false
@@ -76,8 +76,7 @@ Nimbus.HoloDepthWebSocket = function ( textureWidth, textureHeight, data )
                       value: 0,
                       texture: texturePhaseMap	
                   },
-
-        width: {type: "f", value: textureWidth},
+ 
         depthWrite: false
     };
 
@@ -140,11 +139,67 @@ Nimbus.HoloDepthWebSocket = function ( textureWidth, textureHeight, data )
 
     sceneScreen.add(sceneScreenQuad);
     sceneScreen.add(sceneScreenCamera);  
-	
-	dataLoaded = true; 
-	NimbusInitComplete();
-	
-    this.draw = function ( scene, camera, mesh )
+
+    dataLoaded = true; 
+    NimbusInitComplete();
+
+    THREE.Geometry.call( this );
+
+	var ix, iz,
+	width_half = width / 2,
+	height_half = height / 2,
+	gridX = textureWidth || 1,
+	gridZ = textureHeight || 1,
+	gridX1 = gridX + 1,
+	gridZ1 = gridZ + 1,
+	segment_width = width / gridX,
+	segment_height = height / gridZ,
+	normal = new THREE.Vector3( 0, 0, 1 );
+
+	for ( iz = 0; iz < gridZ1; iz ++ ) {
+
+		for ( ix = 0; ix < gridX1; ix ++ ) {
+
+			var x = ix * segment_width - width_half;
+			var y = iz * segment_height - height_half;
+
+			this.vertices.push( new THREE.Vector3( x, - y, 0 ) );
+
+		}
+
+	}
+
+	for ( iz = 0; iz < gridZ; iz ++ ) {
+
+		for ( ix = 0; ix < gridX; ix ++ ) {
+
+			var a = ix + gridX1 * iz;
+			var b = ix + gridX1 * ( iz + 1 );
+			var c = ( ix + 1 ) + gridX1 * ( iz + 1 );
+			var d = ( ix + 1 ) + gridX1 * iz;
+
+			var face = new THREE.Face4( a, b, c, d );
+			face.normal.copy( normal );
+			face.vertexNormals.push( normal.clone(), normal.clone(), normal.clone(), normal.clone() );
+
+			this.faces.push( face );
+			this.faceVertexUvs[ 0 ].push( [
+				new THREE.UV( ix / gridX, 1 - iz / gridZ ),
+				new THREE.UV( ix / gridX, 1 - ( iz + 1 ) / gridZ ),
+				new THREE.UV( ( ix + 1 ) / gridX, 1 - ( iz + 1 ) / gridZ ),
+				new THREE.UV( ( ix + 1 ) / gridX, 1 - iz / gridZ )
+			] );
+
+		}
+
+	}
+
+	this.computeCentroids();
+
+    dataLoaded = true; 
+    NimbusInitComplete();
+
+    this.draw = function ( scene, camera )
     {
         // Pass 1 - Phase Calculation
         sceneScreenQuad.material = shaderPhaseCalculator;
@@ -158,11 +213,13 @@ Nimbus.HoloDepthWebSocket = function ( textureWidth, textureHeight, data )
         sceneScreenQuad.material = shaderNormalCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
 
-        mesh.material = shaderFinalRender;
-		shaderFinalRender.wireframe = wireframeDisplay;
-		
+        this.material = shaderFinalRender;
+        shaderFinalRender.wireframe = wireframeDisplay;
+
         // Pass 4 - Final Render
         renderer.render(scene, camera);
     };
 };
 
+//  We are going to act like geometry so that we can get added to a scene
+Nimbus.HoloDepthWebSocketLoader.prototype = Object.create( THREE.Geometry.prototype );

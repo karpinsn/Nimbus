@@ -1,5 +1,4 @@
 uniform sampler2D phaseMap;
-uniform float width;
 
 varying vec2 fragUV;
 
