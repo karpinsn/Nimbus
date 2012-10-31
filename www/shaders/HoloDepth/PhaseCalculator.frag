@@ -1,3 +1,5 @@
+precision highp float;
+
 uniform sampler2D holovideoFrame;
 
 varying vec2 fragUV;
@@ -8,7 +10,7 @@ void main(void)
 
 	float fringeFrequency = 16.0;						// Frequency of the fringe in Hz
 	float pi = 3.14159265; 								// Mmmmmm PI
-	float stepHeight = 1.0 / fringeFrequency -.001;		// .001 is just a buffer so we dont get rounding errors
+	float stepHeight = 1.0 / fringeFrequency -.00001;		// .00001 is just a buffer so we dont get rounding errors
 
     float k = floor(holoPhase.z * 1.0 / stepHeight);
 
