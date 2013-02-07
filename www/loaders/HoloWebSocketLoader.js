@@ -1,7 +1,7 @@
 Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 {
     var holoframe = new Image();
-    var websocket = new WebSocket(data, "Antenna-BaseStation");
+    var websocket = new WebSocket(data, "Antenna");
 	
 	    //  Textures used by the Holoimage model
     var textureHoloframe = new THREE.Texture(holoframe);
