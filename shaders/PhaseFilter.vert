@@ -1,13 +1,8 @@
-#version 130
-
-in vec3 vert;
-in vec2 vertTexCoord;
-
-out vec2 fragTexCoord;
+varying vec2 fragTexCoord;
 
 void main()
 {
-        fragTexCoord = vertTexCoord;
+        fragTexCoord = uv;
 
-        gl_Position = vec4(vert, 1.0);
+        gl_Position = vec4(position, 1.0);
 }

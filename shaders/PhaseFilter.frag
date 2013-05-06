@@ -1,5 +1,3 @@
-#version 130
-
 /*
   Phase Median Filter
 
@@ -21,8 +19,7 @@ uniform sampler2D image;
 uniform float width;
 uniform float height;
 
-in vec2 fragTexCoord;
-out vec4 filteredImage;
+varying vec2 fragTexCoord;
 
 float step_w = 1.0/width;
 float step_h = 1.0/height;
@@ -51,7 +48,7 @@ void main(void)
   // Using the median phase value and the actual find the correct number of phase jumps
   float originalValue = texture2D(image, fragTexCoord).x;
   float phaseJump = (v[4] - originalValue) / twoPi;
-  int jumps = phaseJump < 0 ? int(phaseJump - .5) : int(phaseJump + .5); 
+  int jumps = phaseJump < 0.0 ? int(phaseJump - .5) : int(phaseJump + .5); 
 
-  filteredImage = vec4(originalValue + (jumps * twoPi), 0.0, 0.0, 0.0);
+  gl_FragColor = vec4(originalValue + (jumps * twoPi), 0.0, 0.0, 0.0);
 }
