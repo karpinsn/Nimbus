@@ -35,8 +35,18 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
             textureHeight, 
             {	minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-        format: THREE.RGBFormat, 
-        type: THREE.FloatType
+                format: THREE.RGBFormat, 
+                type: THREE.FloatType
+            });
+
+    var textureFilteredPhaseMap = new THREE.WebGLRenderTarget(
+            textureWidth,
+            textureHeight,
+            {
+                minFilter: THREE.LinearFilter,
+                magFilter: THREE.NearestFilter,
+                format: THREE.RGBFormat,
+                type: THREE.FloatType
             });
 
     var textureDepthMap = new THREE.WebGLRenderTarget(
@@ -44,8 +54,8 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
             textureHeight, 
             {	minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-        format: THREE.RGBFormat, 
-        type: THREE.FloatType
+                format: THREE.RGBFormat, 
+                type: THREE.FloatType
             });
 
     var textureNormalMap = new THREE.WebGLRenderTarget(
@@ -53,7 +63,7 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
             textureHeight, 
             {	minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-        format: THREE.RGBFormat
+                format: THREE.RGBFormat
             });
 
     var uniformsPhaseCalculator = {
@@ -70,9 +80,22 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
         fragmentShader: loadShader('./shaders/PhaseCalculator.frag')
     });
 
+    var uniformsPhaseFilter = {
+        phaseMap: { type: "t",
+                    value: texturePhaseMap
+                  },
+        depthWrite: false
+    };
+
+    var shaderPhaseFilter = new THREE.ShaderMaterial({
+        uniforms: uniformsPhaseFilter,
+        vertexShader: loadShader('./shaders/PhaseFilter.vert'),
+        fragmentShader: loadShader('./shaders/PhaseFilter.frag')
+    });
+
     var uniformsDepthCalculator = {
         phaseMap: {type: "t", 
-                      value: texturePhaseMap	
+                      value: textureFilteredPhaseMap	
                   },
 
         width: {type: "f", value: textureWidth},
@@ -144,18 +167,22 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
         sceneScreenQuad.material = shaderPhaseCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, texturePhaseMap, true);
 
-        // Pass 2 - Depth Calculation
+        // Pass 2 - Phase Filtering
+        sceneScreenQuad.material = shaderPhaseFilter;
+        renderer.render(sceneScreen, sceneScreenCamera, textureFilteredPhaseMap, true);
+
+        // Pass 3 - Depth Calculation
         sceneScreenQuad.material = shaderDepthCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, textureDepthMap, true);
 
-        // Pass 3 - Normal Calculation
+        // Pass 4 - Normal Calculation
         sceneScreenQuad.material = shaderNormalCalculator;
         renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
 
         mesh.material = shaderFinalRender;
 		shaderFinalRender.wireframe = wireframeDisplay;
 		
-        // Pass 4 - Final Render
+        // Pass 5 - Final Render
         renderer.render(scene, camera);
     };
 };
