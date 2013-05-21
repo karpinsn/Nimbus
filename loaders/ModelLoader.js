@@ -17,5 +17,9 @@ Nimbus.LoadModel = function(data)
         return new Nimbus.HoloWebSocket(512.0, 512.0, data);
 		//return new Nimbus.HoloDepthWebSocket(2, 2, 576.0, 576.0, data);
     }
+    else if(-1 != data.search('(.jpg)'))
+    {
+        //return new Nimbus.HoloWebSocket(512.0, 512.0, data);
+    }
 }
 

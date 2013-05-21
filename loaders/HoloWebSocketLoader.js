@@ -95,7 +95,7 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 
     var uniformsDepthCalculator = {
         phaseMap: {type: "t", 
-                      value: textureFilteredPhaseMap	
+                      value: texturePhaseMap	
                   },
 
         width: {type: "f", value: textureWidth},
