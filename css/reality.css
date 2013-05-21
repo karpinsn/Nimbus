@@ -50,19 +50,19 @@ background: url(../images/btn_toggle_smallscreen.png) no-repeat left top;
 .iowaattrib {
 position: absolute;
 left: 9px;
-top: 831px;
+top: 825px;
 background: url(../images/Iowa.png) no-repeat left top;
 display: block;
 width: 177px;
 float: right;
-height: 16px;
+height: 30px;
 cursor: pointer;
 }
 
 .vracattrib {
 position: absolute;
 left: 190px;
-top: 826px;
+top: 825px;
 background: url(../images/VRAC.png) no-repeat left top;
 display: block;
 width: 105px;
@@ -86,7 +86,7 @@ cursor: pointer;
 .autodeskattrib {
 position: absolute;
 left: 701px;
-top: 828px;
+top: 825px;
 background: url(../images/Autodesk.png) no-repeat left top;
 display: block;
 width: 90px;

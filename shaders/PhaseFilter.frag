@@ -50,5 +50,5 @@ void main(void)
   float phaseJump = (v[4] - originalValue) / twoPi;
   int jumps = phaseJump < 0.0 ? int(phaseJump - .5) : int(phaseJump + .5); 
 
-  gl_FragColor = vec4(originalValue + (jumps * twoPi), 0.0, 0.0, 0.0);
+  gl_FragColor = vec4(originalValue + (float(jumps) * twoPi), 0.0, 0.0, 0.0);
 }

@@ -332,7 +332,6 @@ document.addEventListener("mozfullscreenchange", function () {
     if (document.mozFullScreen == false) {
         full_screen = 1;
         myfullscreen('1');
-        //$("#toolFullscreen").toggleClass("toolSelected");
     }
 }, false);
 
@@ -341,7 +340,6 @@ document.addEventListener("webkitfullscreenchange", function () {
         full_screen = 1;
         myfullscreen('1');
     }
-    //$("#toolFullscreen").toggleClass("toolSelected");
 }, false);
 
 
@@ -370,13 +368,11 @@ function myfullscreen()
         $('#gotoHome').css("top", "15px");
 
         $('#autodeskattrib').css("left", (WIDTH - 110).toString() + "px");
+		
         $('#autodeskattrib').css("top", (HEIGHT - 50).toString() + "px");
-
-
         $('#nimbusattrib').css("top", (HEIGHT - 50).toString() + "px");
+		$('#vracattrib').css("top", (HEIGHT - 50).toString() + "px");
         $('#iowaattrib').css("top", (HEIGHT - 50).toString() + "px");
-
-        //$('#toolFullscreen').addClass("toolFullscreenSelected");
 
         full_screen = 1;
 
@@ -398,11 +394,11 @@ function myfullscreen()
         $('#toolContainer').css("left","747px");
 
         $('#autodeskattrib').css("left", "701px");
-        $('#autodeskattrib').css("top", "828px");
+        $('#autodeskattrib').css("top", "825px");
 
         $('#nimbusattrib').css("top", "825px");
+		$('#vracattrib').css("top", "825px");
         $('#iowaattrib').css("top", "825px");
-        //$('#toolFullscreen').removeClass("toolFullscreenSelected");
         full_screen = 0;
 
         camera.aspect = 800 / 600;
