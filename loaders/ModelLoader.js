@@ -10,7 +10,8 @@ Nimbus.LoadModel = function(data)
     else if(-1 != data.search(holoframeRegex))
     {
         //return new Nimbus.HoloClip(256.0, 256.0, data);
-        return new Nimbus.HoloDepthImage(512.0, 512.0, 512.0, 512.0, data);
+        //return new Nimbus.HoloDepthImage(512.0, 512.0, 512.0, 512.0, data);
+        return new Nimbus.HoloImage(512.0, 512.0, data);
     }
     else if(-1 != data.search(websocketRegex))
     {
@@ -19,7 +20,7 @@ Nimbus.LoadModel = function(data)
     }
     else if(-1 != data.search('(.jpg)'))
     {
-        //return new Nimbus.HoloWebSocket(512.0, 512.0, data);
+        return new Nimbus.HoloImage(512.0, 512.0, data);
     }
 }
 

@@ -2,7 +2,7 @@ uniform sampler2D holovideoFrame;
 
 varying vec2 fragUV;
 
-void main(void)
+void main( void )
 {
 	vec4 holoPhase = texture2D(holovideoFrame, fragUV);
 
@@ -16,7 +16,8 @@ void main(void)
 
 	if(holoPhase.rgb == vec3(0.0))
 	{
-		gl_FragColor = vec4(0.0);
+        // Zero in alpha means that this should be filtered off
+		gl_FragColor = vec4( 0.0 );
 	}
 	else
 	{

@@ -1,35 +1,7 @@
-Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
+Nimbus.HoloImage = function ( textureWidth, textureHeight, data )
 {
-    var holoframe = new Image();
-    var websocket = new WebSocket(data, "Antenna");
-	
-	    //  Textures used by the Holoimage model
-    var textureHoloframe = new THREE.Texture(holoframe);
-    websocket.onopen = function()
-    {
-        return console.log('Connected');
-    }
-
-    websocket.onclose = function()
-    {
-        console.log("Disconnected - Retrying in 4 seconds");
-        return setTimeout(websocket.connect, 4 * 1000); 
-    }
-
-    websocket.onmessage = function(msg)
-    {
-        url=window.webkitURL.createObjectURL(msg.data);
-
-        holoframe.onload = function()
-        {
-			      //	Once we update the texture, revoke the URL so it can be reused
-			      textureHoloframe.onUpdate = function() { window.webkitURL.revokeObjectURL(url); };
-			      textureHoloframe.needsUpdate = true;
-        }
-
-		    holoframe.src = url;
-    }
-
+    var textureHoloframe = THREE.ImageUtils.loadTexture(data, THREE.UVMapping, function(){ dataLoaded = true; NimbusInitComplete();});
+    
     var texturePhaseMap = new THREE.WebGLRenderTarget(
             textureWidth, 
             textureHeight, 
@@ -70,7 +42,7 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
             });
 
     var uniformsPhaseCalculator = {
-        holovideoFrame:         { type: "t", value: textureHoloframe },
+        holovideoFrame:    { type: "t", value: textureHoloframe },
         depthWrite:        false
     };
 
@@ -114,7 +86,7 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 
     var shaderNormalCalculator = new THREE.ShaderMaterial({
         uniforms:       uniformsNormalCalculator,
-        vertexShader:   loadShader('./shaders/NormalCalculator.vert'),
+        vertexShader:   loadShader('./shaders/PassThrough.vert'),
         fragmentShader: loadShader('./shaders/NormalCalculator.frag')
     });
 
