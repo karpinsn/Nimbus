@@ -22,21 +22,22 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
 
         holoframe.onload = function()
         {
-			//	Once we update the texture, revoke the URL so it can be reused
-			textureHoloframe.onUpdate = function() { window.webkitURL.revokeObjectURL(url); };
-			textureHoloframe.needsUpdate = true;
+			      //	Once we update the texture, revoke the URL so it can be reused
+			      textureHoloframe.onUpdate = function() { window.webkitURL.revokeObjectURL(url); };
+			      textureHoloframe.needsUpdate = true;
         }
 
-		holoframe.src = url;
+		    holoframe.src = url;
     }
 
     var texturePhaseMap = new THREE.WebGLRenderTarget(
             textureWidth, 
             textureHeight, 
-            {	minFilter: THREE.LinearFilter, 
+            {	
+                minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-                format: THREE.RGBFormat, 
-                type: THREE.FloatType
+                format:    THREE.RGBFormat, 
+                type:      THREE.FloatType
             });
 
     var textureFilteredPhaseMap = new THREE.WebGLRenderTarget(
@@ -45,104 +46,86 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
             {
                 minFilter: THREE.LinearFilter,
                 magFilter: THREE.NearestFilter,
-                format: THREE.RGBFormat,
-                type: THREE.FloatType
+                format:    THREE.RGBFormat,
+                type:      THREE.FloatType
             });
 
     var textureDepthMap = new THREE.WebGLRenderTarget(
             textureWidth, 
             textureHeight, 
-            {	minFilter: THREE.LinearFilter, 
+            {	
+                minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-                format: THREE.RGBFormat, 
-                type: THREE.FloatType
+                format:    THREE.RGBFormat, 
+                type:      THREE.FloatType
             });
 
     var textureNormalMap = new THREE.WebGLRenderTarget(
             textureWidth, 
             textureHeight, 
-            {	minFilter: THREE.LinearFilter, 
+            {	
+                minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-                format: THREE.RGBFormat
+                format:    THREE.RGBFormat
             });
 
     var uniformsPhaseCalculator = {
-        holovideoFrame: {	type: "t", 
-                            value: textureHoloframe
-                        },
-
-        depthWrite: false
+        holoFrame:         { type: "t", value: textureHoloframe },
+        depthWrite:        false
     };
 
     var shaderPhaseCalculator = new THREE.ShaderMaterial({
-        uniforms: uniformsPhaseCalculator,
-        vertexShader: loadShader('./shaders/PhaseCalculator.vert'),
+        uniforms:       uniformsPhaseCalculator,
+        vertexShader:   loadShader('./shaders/PassThrough.vert'),
         fragmentShader: loadShader('./shaders/PhaseCalculator.frag')
     });
 
     var uniformsPhaseFilter = {
-        phaseMap: { type: "t",
-                    value: texturePhaseMap
-                  },
+        image:      { type: "t", value: textureHoloframe },
         depthWrite: false
     };
 
     var shaderPhaseFilter = new THREE.ShaderMaterial({
-        uniforms: uniformsPhaseFilter,
-        vertexShader: loadShader('./shaders/PhaseFilter.vert'),
+        uniforms:       uniformsPhaseFilter,
+        vertexShader:   loadShader('./shaders/PassThrough.vert'),
         fragmentShader: loadShader('./shaders/PhaseFilter.frag')
     });
 
     var uniformsDepthCalculator = {
-        phaseMap: {type: "t", 
-                      value: texturePhaseMap	
-                  },
-
-        width: {type: "f", value: textureWidth},
+        phaseMap:   { type: "t", value: textureFilteredPhaseMap },
+        width:      { type: "f", value: textureWidth },
         depthWrite: false
     };
 
     var shaderDepthCalculator = new THREE.ShaderMaterial({
-        uniforms: uniformsDepthCalculator,
-        vertexShader: loadShader('./shaders/DepthCalculator.vert'),
+        uniforms:       uniformsDepthCalculator,
+        vertexShader:   loadShader('./shaders/PassThrough.vert'),
         fragmentShader: loadShader('./shaders/DepthCalculator.frag')
     });
 
     var uniformsNormalCalculator = {
-        depthMap: { type: "t", 
-                      value: textureDepthMap	
-                  },
-
-        width: {type: "f", value: textureWidth},
-        height: {type: "f", value: textureHeight},
+        depthMap:   { type: "t", value: textureDepthMap	},
+        width:      { type: "f", value: textureWidth },
+        height:     { type: "f", value: textureHeight },
         depthWrite: false
     };
 
     var shaderNormalCalculator = new THREE.ShaderMaterial({
-        uniforms: uniformsNormalCalculator,
-        vertexShader: loadShader('./shaders/NormalCalculator.vert'),
+        uniforms:       uniformsNormalCalculator,
+        vertexShader:   loadShader('./shaders/NormalCalculator.vert'),
         fragmentShader: loadShader('./shaders/NormalCalculator.frag')
     });
 
     var uniformsFinalRender = {
-        depthMap: {	type: "t", 
-                      value: textureDepthMap	
-                  },
-
-        normalMap: {type: "t", 
-                       value: textureNormalMap	
-                   },
-
-        holovideoFrame: {type: "t", 
-                            value: textureHoloframe					
-                        },
-
-        depthWrite: false
+        depthMap:       { type: "t", value: textureDepthMap	},
+        normalMap:      { type: "t", value: textureNormalMap },
+        holovideoFrame: { type: "t", value: textureHoloframe },
+        depthWrite:     false
     };
 
     var shaderFinalRender = new THREE.ShaderMaterial({
-        uniforms: uniformsFinalRender,
-        vertexShader: loadShader('./shaders/FinalRender.vert'),
+        uniforms:       uniformsFinalRender,
+        vertexShader:   loadShader('./shaders/FinalRender.vert'),
         fragmentShader: loadShader('./shaders/FinalRender.frag')
     });
 
@@ -150,16 +133,16 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
     var sceneScreenCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
     sceneScreenCamera.position.z = 1;
 
-    var sceneScreen = new THREE.Scene();
+    var sceneScreen      = new THREE.Scene();
     var sceneScreenPlane = new Nimbus.ScreenQuad();
-    var sceneScreenQuad = new THREE.Mesh(sceneScreenPlane, shaderPhaseCalculator);
+    var sceneScreenQuad  = new THREE.Mesh(sceneScreenPlane, shaderPhaseCalculator);
     sceneScreenQuad.doubleSided = true;
 
     sceneScreen.add(sceneScreenQuad);
     sceneScreen.add(sceneScreenCamera);  
 	
-	dataLoaded = true; 
-	NimbusInitComplete();
+	  dataLoaded = true; 
+	  NimbusInitComplete();
 	
     this.draw = function ( scene, camera, mesh )
     {
@@ -180,7 +163,7 @@ Nimbus.HoloWebSocket = function ( textureWidth, textureHeight, data )
         renderer.render(sceneScreen, sceneScreenCamera, textureNormalMap, true);
 
         mesh.material = shaderFinalRender;
-		shaderFinalRender.wireframe = wireframeDisplay;
+		    shaderFinalRender.wireframe = wireframeDisplay;
 		
         // Pass 5 - Final Render
         renderer.render(scene, camera);
