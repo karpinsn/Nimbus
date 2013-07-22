@@ -1,0 +1,1 @@
+Nimbus.Settings.HoloFrequency = 8.0;
