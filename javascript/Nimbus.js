@@ -138,7 +138,7 @@ function NimbusInit()
     // -----------------------------------------------------------------
     // Init controls
     // -----------------------------------------------------------------
-    controls = new Nimbus.TrackballControls( camera, renderer.domElement, this );
+    controls = new THREE.TrackballControls( camera, renderer.domElement, this );
 
     controls.target.set( 0, 0, 0 );
     controls.rotateSpeed = 0.5;
@@ -187,12 +187,26 @@ function NimbusInit()
     scene = new THREE.Scene();
     var width = 2, height = 2, segmentsWidth = 576.0, segmentsHeight = 576.0, depth = 2;
     
-    
+    /*
     mesh = new THREE.Mesh(
             new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
             shaderFinalRender 
             );
+    */
     
+    // TODO: Working on using a particle field instead of a plane geometry
+    var particles = new THREE.Geometry();
+    for( var x = 0; x < 512; ++x )
+    {
+        for( var y = 0; y < 512; ++y )
+        {
+            particles.vertices.push( new THREE.Vector3(x/512.0, y/512.0, 0) );
+        }
+    }
+    mesh = new THREE.ParticleSystem(particles, shaderFinalRender);
+    mesh.position.x = -.5;
+    mesh.position.y = -.5;
+
     // add the mesh to the scene
     scene.add(mesh);
 
@@ -418,9 +432,6 @@ function render()
     updateHomeTraversal();
 
     renderer.clear();	
-    
-    //mesh.draw(scene, camera, mesh);
     holoimage.draw(scene, camera, mesh);
-	//renderer.render( scene, camera );
 	navCube.render(camera);
 }

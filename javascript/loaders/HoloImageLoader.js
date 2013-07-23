@@ -94,13 +94,16 @@ Nimbus.HoloImage = function ( textureWidth, textureHeight, data )
         depthMap:       { type: "t", value: textureDepthMap	},
         normalMap:      { type: "t", value: textureNormalMap },
         holovideoFrame: { type: "t", value: textureHoloframe },
+        size:           { type: "f", value: 3.0 }, 
         depthWrite:     false
     };
 
     var shaderFinalRender = new THREE.ShaderMaterial({
         uniforms:       uniformsFinalRender,
         vertexShader:   loadShader('./shaders/FinalRender.vert'),
-        fragmentShader: loadShader('./shaders/FinalRender.frag')
+        fragmentShader: loadShader('./shaders/FinalRender.frag'),
+        transparent: true,
+        depthWrite: false
     });
 
     //  Used for offscreen rendering
@@ -115,8 +118,8 @@ Nimbus.HoloImage = function ( textureWidth, textureHeight, data )
     sceneScreen.add(sceneScreenQuad);
     sceneScreen.add(sceneScreenCamera);  
 	
-	  dataLoaded = true; 
-	  NimbusInitComplete();
+	dataLoaded = true; 
+    NimbusInitComplete();
 	
     this.draw = function ( scene, camera, mesh )
     {
