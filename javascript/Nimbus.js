@@ -18,16 +18,12 @@ var incPosition, incRotation, incUp, incTarget;
 var HOME_STEPS = 30;
 var homeFrame = 0;
 
-var holoimage;
+var model;
 var navCube;
 
 var shaderFinalRender;
 
 var mouse = { x: 0, y: 0 }, INTERSECTED;
-
-// set the scene size
-var WIDTH = 800,
-    HEIGHT = 600;
 
 // set some camera attributes
 var VIEW_ANGLE = 45,
@@ -63,22 +59,18 @@ function showLoading()
 
         path: [
             ['arc', 10, 10, 10, -270, -90],
-        ['bezier', 10, 0, 40, 20, 20, 0, 30, 20],
-        ['arc', 40, 10, 10, 90, -90],
-        ['bezier', 40, 0, 10, 20, 30, 0, 20, 20]
+            ['bezier', 10, 0, 40, 20, 20, 0, 30, 20],
+            ['arc', 40, 10, 10, 90, -90],
+            ['bezier', 40, 0, 10, 20, 30, 0, 20, 20]
             ]
     };
-    loadingIndicator = new Sonic(loader);
+    loadingIndicator = new Sonic( loader );
 
     //	Make the dialog visible
     var loadingContainer = document.getElementById('NimbusLoadingDialog');
     loadingContainer.style.display = "block";
-
     loadingIndicatorDiv = document.getElementById('NimbusLoaderIndicator');
-
-
     loadingIndicatorDiv.appendChild(loadingIndicator.canvas);
-
     loadingIndicator.play();
 }
 
@@ -103,16 +95,13 @@ function NimbusInit()
 
     $container.append(renderer.domElement);
 
-    renderer.setSize(WIDTH, HEIGHT);
+    renderer.setSize(Nimbus.Settings.SceneWidth, Nimbus.Settings.SceneHeight);
     renderer.setClearColorHex(0x000000, 1.0);	
     renderer.autoClear = false;
 
     //	Events
     window.addEventListener( 'resize', onWindowResize, false );
 
-    // -----------------------------------------------------------------
-    // Init mesh
-    // -----------------------------------------------------------------		
 	//	Needed to enable floating point textures
 	var gl = renderer.context;
 	if (!gl.getExtension("OES_texture_float")) {
@@ -120,14 +109,11 @@ function NimbusInit()
 	}
 	
 	//	Retrieve the data to display
-	var data = getUrlVars()["data"];
-    holoimage = Nimbus.LoadModel(data);
-    //mesh = Nimbus.LoadModel(data);
+	var modelData = getUrlVars()["data"];
+    model = Nimbus.LoadModel( modelData );
 
 	navCube = new Nimbus.Navcube();
 	navCube.init();
-
-    
 
     // -----------------------------------------------------------------
     // Init camera
@@ -182,40 +168,29 @@ function NimbusInit()
     Nimbus.ui.toolFullscreen = new Nimbus.Button('toolFullscreen', myfullscreen);
 
     // -----------------------------------------------------------------
-    // Init scene
+    // Init scene and the mesh
     // -----------------------------------------------------------------		
     scene = new THREE.Scene();
-    var width = 2, height = 2, segmentsWidth = 576.0, segmentsHeight = 576.0, depth = 2;
     
-    /*
-    mesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(width, height, segmentsWidth, segmentsHeight),
-            shaderFinalRender 
-            );
-    */
-    
-    // TODO: Working on using a particle field instead of a plane geometry
     var particles = new THREE.Geometry();
-    for( var x = 0; x < 512; ++x )
+    for( var x = 0; x < Nimbus.Settings.ModelWidth; ++x )
     {
-        for( var y = 0; y < 512; ++y )
+        for( var y = 0; y < Nimbus.Settings.ModelHeight; ++y )
         {
-            particles.vertices.push( new THREE.Vector3(x/512.0, y/512.0, 0) );
+            particles.vertices.push( new THREE.Vector3( x / Nimbus.Settings.ModelWidth, y / Nimbus.Settings.ModelHeight, 0 ) );
         }
     }
+
     mesh = new THREE.ParticleSystem(particles, shaderFinalRender);
+    
+    // Center the mesh in the middle of the screen
     mesh.position.x = -.5;
     mesh.position.y = -.5;
 
-    // add the mesh to the scene
     scene.add(mesh);
-
     scene.add(camera);
-    renderer.setSize(WIDTH, HEIGHT);
-    renderer.setClearColorHex(0x000000, 1.0);		
 
     renderInit = true;
-
     NimbusInitComplete();
 }
 
@@ -432,6 +407,6 @@ function render()
     updateHomeTraversal();
 
     renderer.clear();	
-    holoimage.draw(scene, camera, mesh);
+    model.draw(scene, camera, mesh);
 	navCube.render(camera);
 }
