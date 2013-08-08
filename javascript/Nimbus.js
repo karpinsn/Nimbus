@@ -204,18 +204,15 @@ function NimbusInitComplete()
 
 function onWindowResize( event ) 
 {
-    width = WIDTH;
-    height = HEIGHT;
+    renderer.setSize( Nimbus.Settings.SceneWidth, Nimbus.Settings.SceneHeight );
 
-    renderer.setSize( width, height );
-
-    camera.aspect = width / height;
+    camera.aspect = Nimbus.Settings.SceneWidth / Nimbus.Settings.SceneHeight;
     camera.updateProjectionMatrix();
 
-    controls.screen.width = width;
-    controls.screen.height = height;
+    controls.screen.width = Nimbus.Settings.SceneWidth;
+    controls.screen.height = Nimbus.Settings.SceneHeight;
 
-    camera.radius = ( width + height ) / 4;
+    camera.radius = ( Nimbus.Settings.SceneWidth + Nimbus.Settings.SceneHeight ) / 4;
  
 	navCube.windowResize();
 }
@@ -336,42 +333,42 @@ function myfullscreen()
 {
     if (full_screen == 0) {
         requestFullScreen(document.getElementById("NimbusContext"));
-        WIDTH = screen.width;
-        HEIGHT = screen.height;
-        $container.css("width", WIDTH);
-        $container.css("height", HEIGHT);
-        renderer.setSize( WIDTH, HEIGHT);
+        Nimbus.Settings.SceneWidth = screen.width;
+        Nimbus.Settings.SceneHeight = screen.height;
+        $container.css("width", Nimbus.Settings.SceneWidth);
+        $container.css("height", Nimbus.Settings.SceneHeight);
+        renderer.setSize( Nimbus.Settings.SceneWidth, Nimbus.Settings.SceneHeight);
 
         camera.updateProjectionMatrix();
 
         $('#toolContainer').css("position","absolute");
         $('#toolContainer').css("width","45");
-        $('#toolContainer').css("left",(WIDTH - 55).toString() + "px");
+        $('#toolContainer').css("left",(Nimbus.Settings.SceneWidth - 55).toString() + "px");
 
 
-        $('#navCube').css("left", (WIDTH - 175).toString() + "px");
+        $('#navCube').css("left", (Nimbus.Settings.SceneWidth - 175).toString() + "px");
         $('#navCube').css("top", "-70px");
         $('#NimbusContext').css("margin-top","0px");
 
-        $('#gotoHome').css("left", (WIDTH - 110).toString() + "px");
+        $('#gotoHome').css("left", (Nimbus.Settings.SceneWidth - 110).toString() + "px");
         $('#gotoHome').css("top", "15px");
 
-        $('#autodeskattrib').css("left", (WIDTH - 110).toString() + "px");
+        $('#autodeskattrib').css("left", (Nimbus.Settings.SceneWidth - 110).toString() + "px");
 		
-        $('#autodeskattrib').css("top", (HEIGHT - 50).toString() + "px");
-        $('#nimbusattrib').css("top", (HEIGHT - 50).toString() + "px");
-		$('#vracattrib').css("top", (HEIGHT - 50).toString() + "px");
-        $('#iowaattrib').css("top", (HEIGHT - 50).toString() + "px");
+        $('#autodeskattrib').css("top", (Nimbus.Settings.SceneHeight - 50).toString() + "px");
+        $('#nimbusattrib').css("top", (Nimbus.Settings.SceneHeight - 50).toString() + "px");
+		$('#vracattrib').css("top", (Nimbus.Settings.SceneHeight - 50).toString() + "px");
+        $('#iowaattrib').css("top", (Nimbus.Settings.SceneHeight - 50).toString() + "px");
 
         full_screen = 1;
 
     } else {
         cancelFullScreen();
-        WIDTH = 800;
-        HEIGHT = 600;
-        $container.css("width", 800);
-        $container.css("height", 600);
-        renderer.setSize( WIDTH, HEIGHT);
+        Nimbus.Settings.SceneWidth = 800;
+        Nimbus.Settings.SceneHeight = 600;
+        $container.css("width", Nimbus.Settings.SceneWidth);
+        $container.css("height", Nimbus.Settings.SceneHeight);
+        renderer.setSize( Nimbus.Settings.SceneWidth, Nimbus.Settings.SceneHeight);
 
         $('#NimbusContext').css("margin-top","80px");
         $('#navCube').css("left", "625px");
