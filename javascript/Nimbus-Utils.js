@@ -38,14 +38,25 @@ Nimbus.ScreenQuad = function()
 	this.vertices.push(new THREE.Vector3(1, 1, 0));
 	this.vertices.push(new THREE.Vector3(-1, 1, 0));
 	
-	//	Generate the quad face
-	var face = new THREE.Face4(0, 1, 2, 3);
-	face.normal.copy(normal);
+	//	Generate the quad faces
+	var face = new THREE.Face3(0, 1, 3);
+	face.normal.copy( normal );
 	face.vertexNormals.push(normal.clone(), normal.clone(), normal.clone(), normal.clone());
-	
 	this.faces.push(face);
+	
+	// Now add the UV coords
 	this.faceVertexUvs[0].push( [
 		new THREE.Vector2(0, 0),
+		new THREE.Vector2(1, 0),
+		new THREE.Vector2(0, 1),
+	]);
+
+	var face2 = new THREE.Face3( 1, 2, 3 );
+	face2.normal.copy( normal );
+	face2.vertexNormals.push(normal.clone(), normal.clone(), normal.clone(), normal.clone());
+	this.faces.push(face2);
+
+	this.faceVertexUvs[0].push( [
 		new THREE.Vector2(1, 0),
 		new THREE.Vector2(1, 1),
 		new THREE.Vector2(0, 1)

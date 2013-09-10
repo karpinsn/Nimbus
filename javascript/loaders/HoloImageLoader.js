@@ -93,8 +93,8 @@ Nimbus.HoloImage = function ( textureWidth, textureHeight, data )
     var uniformsFinalRender = {
         depthMap:       { type: "t", value: textureDepthMap	},
         normalMap:      { type: "t", value: textureNormalMap },
-        holovideoFrame: { type: "t", value: textureHoloframe },
-        size:           { type: "f", value: 3.0 }, 
+		holovideoFrame: { type: "t", value: textureHoloframe },
+		size:           { type: "f", value: 3.0 }, 
         depthWrite:     false
     };
 

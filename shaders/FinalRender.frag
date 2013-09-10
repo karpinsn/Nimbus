@@ -11,7 +11,7 @@ void main()
 	vec3 lightPosition = vec3(4.0, 4.0, 4.0);
 
 	vec3 fragNormal = normalize(fragNormalMatrix * vec3(texture2D(normalMap, fragUV)));
-	vec3 holoFrag = vec3(texture2D(holovideoFrame, fragUV));
+	vec4 holoFrag = texture2D(holovideoFrame, fragUV);
 	vec3 L = normalize(lightPosition - fragVertex.xyz);
 	vec3 E = normalize(-fragVertex.xyz);
 	vec3 R = normalize(-reflect(L,fragNormal));
@@ -38,7 +38,7 @@ void main()
 	else
 	{
 		//gl_FragColor = Iamb + Idiff + Ispec;
-		gl_FragColor = texture2D(normalMap, fragUV);
-		//gl_FragColor = vec4(fragUV.x, fragUV.y, 0.0, 1.0);
+		//gl_FragColor = texture2D(normalMap, fragUV);
+		gl_FragColor = vec4( holoFrag.aaa, 1.0);
 	}
 }
