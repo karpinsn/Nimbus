@@ -96,7 +96,7 @@ function NimbusInit()
     $container.append(renderer.domElement);
 
     renderer.setSize(Nimbus.Settings.SceneWidth, Nimbus.Settings.SceneHeight);
-    renderer.setClearColorHex(0x000000, 1.0);	
+    renderer.setClearColor(new THREE.Color(0x000000));	
     renderer.autoClear = false;
 
     //	Events
@@ -405,5 +405,5 @@ function render()
 
     renderer.clear();	
     model.draw(scene, camera, mesh);
-	navCube.render(camera);
+	navCube.render(renderer, camera);
 }
