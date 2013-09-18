@@ -7,6 +7,10 @@ Nimbus.LoadModel = function(data)
     {
         return new Nimbus.DitherHoloClip(256.0, 256.0, data);
     }
+    else if (-1 != data.search('(.holoclip.png)'))
+    {
+        return new Nimbus.HoloClip(256.0, 256.0, data);
+    }
     else if(-1 != data.search(holoframeRegex))
     {
         //return new Nimbus.HoloClip(256.0, 256.0, data);

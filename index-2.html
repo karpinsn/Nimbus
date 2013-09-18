@@ -1,0 +1,154 @@
+<!doctype html>
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!-- Consider adding an manifest.appcache: h5bp.com/d/Offline -->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <!-- Use the .htaccess and remove these lines to avoid edge case issues.
+       More info: h5bp.com/b/378 -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>3D Reality Capture at the VRAC</title>
+  <meta name="description" content="3D Reality Capture">
+  <meta name="author" content="Iowa State University">
+
+  <!-- Mobile viewport optimized: j.mp/bplateviewport -->
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory: mathiasbynens.be/notes/touch-icons -->
+
+  <!-- CSS: implied media=all -->
+  <!-- CSS concatenated and minified via ant build script-->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/reality.css">
+  <!-- end CSS-->
+
+  <!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
+
+  <!-- All JavaScript at the bottom, except for Modernizr / Respond.
+       Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries
+       For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
+  <script src="javascript/3rdPartyLibs/modernizr.js"></script>
+  
+  <script type="text/javascript" src="javascript/3rdPartyLibs/sonic/sonic.js"></script>
+  <script type="text/javascript" src="javascript/3rdPartyLibs/three.js"></script>
+
+  <script type="text/javascript" src="javascript/Nimbus.js"></script>
+  <script type="text/javascript" src="javascript/Nimbus-Settings.js"></script>
+  <script type="text/javascript" src="javascript/TrackballControls.js"></script>
+  <script type="text/javascript" src="javascript/3rdPartyLibs/stats/Stats.js"></script>
+  <script type="text/javascript" src="javascript/Nimbus-Utils.js"></script>
+  <script type="text/javascript" src="javascript/ui/Button.js"></script>
+  <script type="text/javascript" src="javascript/ui/ButtonDivider.js"></script>
+  <script type="text/javascript" src="javascript/ui/ButtonGroup.js"></script>
+
+  <script type="text/javascript" src="javascript/ui/Navcube.js"></script>
+  <script type="text/javascript" src="javascript/loaders/ModelLoader.js"></script>
+  <script type="text/javascript" src="javascript/loaders/HoloClipLoader.js"></script>
+  <script type="text/javascript" src="javascript/loaders/DitherHoloClipLoader.js"></script>
+  <script type="text/javascript" src="javascript/loaders/HoloWebSocketLoader.js"></script>
+  <script type="text/javascript" src="javascript/loaders/HoloDepthImageLoader.js"></script>
+  <script type="text/javascript" src="javascript/loaders/HoloDepthWebSocketLoader.js"></script>
+  <script type="text/javascript" src="javascript/loaders/HoloImageLoader.js"></script>
+</head>
+
+<body>
+<div id="full-height">
+<div id="dna-bg"></div>
+<div id="container" class="container">
+	
+	<header>
+
+		<div id="product-name" class="container">
+	
+		</div>
+	</header>
+	
+	<div id="main" role="main" class="clearfix">
+		
+		<div class="results-text">
+			<h2>Reality Capture Results</h2>
+			<p>The box below shows the representation of your reality capture at the  <a href='http://www.vrac.iastate.edu/index.php' target='_blank'>VRAC</a>. Make sure you are on the latest <a href='http://www.google.com/chrome' target='_blank'>Chrome</a> browser.</p>
+		</div>
+
+		<div id="NimbusContext" class="reality-capture-viewer">
+			<div id="NimbusLoadingDialog" style="color:rgb(118,118,118); position: absolute; left:360px; top:510px;">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loading...
+				<div id="NimbusLoaderIndicator" style="margin-top:7px;"></div>
+			</div>
+		<div id="navCube" style="position:absolute; left:625px; top:180px"></div>
+		<a href='http://www.vrac.iastate.edu/~song/'><div id = "iowaattrib" class="iowaattrib"></div></a>
+		<a href='http://www.vrac.iastate.edu/index.php'><div id = "vracattrib" class="vracattrib"></div></a>
+		<a href='http://nikkarpinsky.com/project/nimbus/'><div id = "nimbusattrib" class="nimbusattrib"></div></a>		
+		<a href='http://www.autodesk.com'><div id = "autodeskattrib" class="autodeskattrib"></div></a>	
+		<div id = "gotoHome" class="gotoHome" onclick="gotoHome()" onmouseover="glowOnHome(this)" onmouseout="glowOffHome(this)">	</div> 
+                <div id="NimbusUI">
+                </div>
+                <div id="toolContainer" >
+                 <div id="toolActions" style="vertical-align:middle; position:absolute; left:8px; top:3px;">
+                  <!--<div id="toolRotate" onmouseover="glowOn(this)" onmouseout="glowOff(this)"  onclick="doRotate()" class="toolBase toolRotate toolSelected" style="display: block; "></div>
+                  <div id="toolPan" onmouseover="glowOn(this)" onmouseout="glowOff(this)"  onclick="doPan()" class="toolBase toolPan" style="display: block; "></div>
+                  <div id="toolZoomIn" onmouseover="glowOn(this)" onmouseout="glowOff(this)"  onclick="doZoomIn()" class="toolBase toolZoomIn" style="display: block; "></div>
+				  <div id="divider1" class="divider"></div>
+                  <div id="toolWireframe" onmouseover="glowOn(this)" onmouseout="glowOff(this)"  onclick="doWireframe()" class="toolBase toolWireframe toolSelected" style="display: block; "></div>
+				  <div id="divider2" class="divider"></div>
+                  <div id="toolFullscreen" onmouseover="glowOn(this)" onmouseout="glowOff(this)" class="toolBase toolFullscreen" style="display: block;" onclick="myfullscreen('yes')"></div>-->
+                </div>
+              </div>
+		  
+			
+		</div>
+
+        <!-- <div id = "cp" class="copyright"> <p class="">&copy; 2013 Iowa State University. All rights reserved. &nbsp; &nbsp; &nbsp;&copy; 2013 Autodesk Inc. All rights reserved.</p></div> -->
+        <div id="footer">
+          <div class="container">
+            <p class="text-muted credit">
+              &copy; 2013 Iowa State University. All rights reserved. &copy; 2013 Autodesk Inc. All rights reserved.
+            </p>
+          </div>
+        </div>
+	</div>
+
+</div> <!--! end of #container -->
+</div>
+
+
+
+  <!-- JavaScript at the bottom for fast page loading -->
+
+  <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
+  <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script> -->
+  <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+  <script>window.jQuery || document.write('<script src="javascript/3rdPartyLibs/jquery.min.js"><\/script>')</script>
+
+  <script src="javascript/reality.js"></script>
+
+  <script type="text/javascript">	
+	NimbusInit();
+	NimbusRun();
+  </script>
+
+  <!-- Twitter Bootstrap CDN Resources -->
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  
+  <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you want to support IE 6.
+       chromium.org/developers/how-tos/chrome-frame-getting-started -->
+  <!--[if lt IE 7 ]>
+    <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+    <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
+  <![endif]-->
+  
+</body>
+</html>

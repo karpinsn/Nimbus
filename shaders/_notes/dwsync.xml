@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dwsync>
+<file name="colorChannelConvert.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379067486" remote="130240143600000000" Dst="2" />
+<file name="DepthCalculator.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379017483" remote="130240143600000000" Dst="2" />
+<file name="DepthCalculator.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379027483" remote="130240143600000000" Dst="2" />
+<file name="FinalRender.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379027483" remote="130240143600000000" Dst="2" />
+<file name="FinalRender.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379027483" remote="130240143600000000" Dst="2" />
+<file name="Gaussian5x5.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379027483" remote="130240143600000000" Dst="2" />
+<file name="Gaussian5x5Horizontal.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379027483" remote="130240143600000000" Dst="2" />
+<file name="Gaussian5x5Vertical.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379037484" remote="130240143600000000" Dst="2" />
+<file name="Holo2Phase.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379037484" remote="130240143600000000" Dst="2" />
+<file name="NormalCalculator.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379047485" remote="130240143600000000" Dst="2" />
+<file name="NormalCalculator.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379047485" remote="130240143600000000" Dst="2" />
+<file name="PassThrough.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379047485" remote="130240143600000000" Dst="2" />
+<file name="PhaseCalculator.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379047485" remote="130240143600000000" Dst="2" />
+<file name="PhaseCalculator.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379047485" remote="130240143600000000" Dst="2" />
+<file name="PhaseFilter.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379047485" remote="130240143600000000" Dst="2" />
+<file name="PhaseFilter.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379057485" remote="130240143600000000" Dst="2" />
+<file name="TextureDisplay.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379057485" remote="130240143600000000" Dst="2" />
+<file name="TextureDisplay.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379057485" remote="130240143600000000" Dst="2" />
+<file name="TimeClipper.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379057485" remote="130240143600000000" Dst="2" />
+<file name="TimeClipper.vert" server="projects.vrac.iastate.edu//tbell/" local="130238169379057485" remote="130240143600000000" Dst="2" />
+<file name="colorChannelConvert.frag" server="projects.vrac.iastate.edu//tbell/" local="130238169379057485" remote="130240143600000000" Dst="2" />
+</dwsync>
