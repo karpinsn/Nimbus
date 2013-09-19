@@ -6,7 +6,7 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
             textureHeight, 
             {	minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-        format: THREE.RGBFormat
+                format: THREE.RGBFormat
             });
 
     var texturePhaseMap = new THREE.WebGLRenderTarget(
@@ -14,8 +14,8 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
             textureHeight, 
             {	minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-        format: THREE.RGBFormat, 
-        type: THREE.FloatType
+                format: THREE.RGBFormat, 
+                type: THREE.FloatType
             });
 
     var textureDepthMap = new THREE.WebGLRenderTarget(
@@ -23,8 +23,8 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
             textureHeight, 
             {	minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-        format: THREE.RGBFormat, 
-        type: THREE.FloatType
+                format: THREE.RGBFormat, 
+                type: THREE.FloatType
             });
 
     var textureNormalMap = new THREE.WebGLRenderTarget(
@@ -32,18 +32,18 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
             textureHeight, 
             {	minFilter: THREE.LinearFilter, 
                 magFilter: THREE.NearestFilter, 
-        format: THREE.RGBFormat
+                format: THREE.RGBFormat
             });
 
     var uniformsTimeClipper = {
         textureOverTime: {type: "t", 	
-                             value: THREE.ImageUtils.loadTexture(data, THREE.UVMapping, function(){dataLoaded = true; NimbusInitComplete();})
+                          value: THREE.ImageUtils.loadTexture(data, THREE.UVMapping, function(){dataLoaded = true; NimbusInitComplete();})
                          },
 
         deltaTime: 			{type: "f", value: 0.2},
         framesPerSecond: 	{type: "f", value: 30.0},
-        cols: 				{type: "f", value: 16.0},
-        rows: 				{type: "f", value: 16.0},
+        cols: 				{type: "f", value: 8.0},
+        rows: 				{type: "f", value: 8.0},
         depthWrite: false
     };
 
@@ -117,7 +117,7 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
     var shaderFinalRender = new THREE.ShaderMaterial({
         uniforms: uniformsFinalRender,
         vertexShader: loadShader('./shaders/FinalRender.vert'),
-        fragmentShader: loadShader('./shaders/FinalRender.frag')
+        fragmentShader: loadShader('./shaders/FinalRenderColor.frag')
     });
 
     //  Used for offscreen rendering
@@ -138,7 +138,7 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
     this.draw = function ( scene, camera, mesh )
     {
         shaderTimeClipper.uniforms.deltaTime.value = new Date().getTime() - startTime;
-		
+
         // Pass 0 - Time Clipping
         sceneScreenQuad.material = shaderTimeClipper;
         renderer.render(sceneScreen, sceneScreenCamera, textureHoloframe, true);
