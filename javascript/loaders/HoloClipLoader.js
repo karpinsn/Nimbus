@@ -111,7 +111,7 @@ Nimbus.HoloClip = function ( textureWidth, textureHeight, data )
                             value: textureHoloframe						
                         },
 
-        depthWrite: false
+        depthWrite: true
     };
 
     var shaderFinalRender = new THREE.ShaderMaterial({
