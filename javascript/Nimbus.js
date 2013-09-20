@@ -407,3 +407,40 @@ function render()
     model.draw(scene, camera, mesh);
 	navCube.render(renderer, camera);
 }
+
+var lastLeapX = null;
+var lastLeapY = null;
+var lastLeapZ = null;
+
+function doLeapMotion( frame )
+{
+    if ( frame.hands.length > 0 && frame.pointables.length > 1)
+    {
+        var x = frame.hands[0].palmPosition[0] / 16;
+        var y = frame.hands[0].palmPosition[1] / 32;
+        var z = frame.hands[0].palmPosition[2] / 16;
+
+        if (!lastLeapX)
+        {
+            lastLeapX = x;
+            lastLeapY = y;
+            lastLeapZ = z; 
+        }
+
+        camera.position.x += ( x - lastLeapX );
+        camera.position.y += ( y - lastLeapY );
+        camera.position.z += ( z - lastLeapZ );
+
+        lastLeapX = x;
+        lastLeapY = y;
+        lastLeapZ = z;
+
+        renderer.render( scene, camera );
+    }
+    else
+    {
+        lastLeapX = null;
+        lastLeapY = null;
+        lastLeapZ = null;
+    }
+}
