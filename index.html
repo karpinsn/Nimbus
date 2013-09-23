@@ -8,7 +8,7 @@
     <!-- <link rel="shortcut icon" href="../../assets/ico/favicon.png"> -->
     <title>Nimbus 3D</title>
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/reality.css">
     <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
@@ -96,6 +96,18 @@
         <div class="panel-body">
           The box below shows the representation of your 3D reality capture at the <a href='http://www.vrac.iastate.edu/index.php' target='_blank'>Iowa State University VRAC</a>. Please ensure you are on the latest <a href='http://www.google.com/chrome' target='_blank'>Google Chrome</a> web browser.
         </div>
+        <div class="panel-footer">
+        	<div class="row">
+        		<div class="col-md-4"></div>
+        		<div class="col-md-4">
+        			
+        			<p class="text-center text-primary">Leap Motion Support</p>
+        			<center><input type="checkbox" onchange="toggleLeapMotion(this)" class="effeckt-ckbox-ios7" checked></center>
+
+        		</div>
+        		<div class="col-md-4"></div>
+        	</div>
+        </div>
       </div>
     </div>
     <!-- Main component for a primary marketing message or call to action -->
@@ -149,13 +161,13 @@
       ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script> 
+    <script src="bootstrap/js/bootstrap.min.js"></script> 
     <script src="//js.leapmotion.com/0.2.0/leap.min.js"></script>
     <script src="javascript/reality.js"></script>
     <script type="text/javascript">	
       NimbusInit();
       NimbusRun();
-      Leap.loop(doLeapMotion);
+      Leap.loop ( {enableGestures: true}, doLeapMotion );
     </script>
 
 

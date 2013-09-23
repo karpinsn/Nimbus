@@ -27,9 +27,9 @@ var mouse = { x: 0, y: 0 }, INTERSECTED;
 
 // set some camera attributes
 var VIEW_ANGLE = 45,
-    ASPECT = 400 / 300,
-    NEAR = .1,
-    FAR = 10000;
+ASPECT = 400 / 300,
+NEAR = .1,
+FAR = 10000;
 
 var loadingIndicatorDiv, loadingIndicator;
 
@@ -58,11 +58,11 @@ function showLoading()
         },
 
         path: [
-            ['arc', 10, 10, 10, -270, -90],
-            ['bezier', 10, 0, 40, 20, 20, 0, 30, 20],
-            ['arc', 40, 10, 10, 90, -90],
-            ['bezier', 40, 0, 10, 20, 30, 0, 20, 20]
-            ]
+        ['arc', 10, 10, 10, -270, -90],
+        ['bezier', 10, 0, 40, 20, 20, 0, 30, 20],
+        ['arc', 40, 10, 10, 90, -90],
+        ['bezier', 40, 0, 10, 20, 30, 0, 20, 20]
+        ]
     };
     loadingIndicator = new Sonic( loader );
 
@@ -112,8 +112,8 @@ function NimbusInit()
 	var modelData = getUrlVars()["data"];
     model = Nimbus.LoadModel( modelData );
 
-	navCube = new Nimbus.Navcube();
-	navCube.init();
+    navCube = new Nimbus.Navcube();
+    navCube.init();
 
     // -----------------------------------------------------------------
     // Init camera
@@ -213,8 +213,8 @@ function onWindowResize( event )
     controls.screen.height = Nimbus.Settings.SceneHeight;
 
     camera.radius = ( Nimbus.Settings.SceneWidth + Nimbus.Settings.SceneHeight ) / 4;
- 
-	navCube.windowResize();
+
+    navCube.windowResize();
 }
 
 function gotoHome() {
@@ -354,10 +354,10 @@ function myfullscreen()
         $('#gotoHome').css("top", "15px");
 
         $('#autodeskattrib').css("left", (Nimbus.Settings.SceneWidth - 110).toString() + "px");
-		
+
         $('#autodeskattrib').css("top", (Nimbus.Settings.SceneHeight - 50).toString() + "px");
         $('#nimbusattrib').css("top", (Nimbus.Settings.SceneHeight - 50).toString() + "px");
-		$('#vracattrib').css("top", (Nimbus.Settings.SceneHeight - 50).toString() + "px");
+        $('#vracattrib').css("top", (Nimbus.Settings.SceneHeight - 50).toString() + "px");
         $('#iowaattrib').css("top", (Nimbus.Settings.SceneHeight - 50).toString() + "px");
 
         full_screen = 1;
@@ -383,7 +383,7 @@ function myfullscreen()
         $('#autodeskattrib').css("top", "825px");
 
         $('#nimbusattrib').css("top", "825px");
-		$('#vracattrib').css("top", "825px");
+        $('#vracattrib').css("top", "825px");
         $('#iowaattrib').css("top", "825px");
         full_screen = 0;
 
@@ -405,42 +405,60 @@ function render()
 
     renderer.clear();	
     model.draw(scene, camera, mesh);
-	navCube.render(renderer, camera);
+    navCube.render(renderer, camera);
 }
 
 var lastLeapX = null;
 var lastLeapY = null;
 var lastLeapZ = null;
+var isLeapEnabled = 1;
 
 function doLeapMotion( frame )
 {
-    if ( frame.hands.length > 0 && frame.pointables.length > 1)
+    if (isLeapEnabled)
     {
-        var x = frame.hands[0].palmPosition[0] / 16;
-        var y = frame.hands[0].palmPosition[1] / 32;
-        var z = frame.hands[0].palmPosition[2] / 16;
-
-        if (!lastLeapX)
+        if ( frame && frame.hands.length > 0 && frame.pointables.length > 1)
         {
+            var x = -(frame.hands[0].palmPosition[0] / 16);
+            var y = frame.hands[0].palmPosition[1] / 32;
+            var z = frame.hands[0].palmPosition[2] / 16;
+
+            if (!lastLeapX)
+            {
+                lastLeapX = x;
+                lastLeapY = y;
+                lastLeapZ = z; 
+            }
+
+            camera.position.x += ( x - lastLeapX );
+            camera.position.y += ( y - lastLeapY );
+            camera.position.z += ( z - lastLeapZ );
+
             lastLeapX = x;
             lastLeapY = y;
-            lastLeapZ = z; 
+            lastLeapZ = z;
+
+            renderer.render( scene, camera );
+        }
+        else
+        {
+            lastLeapX = null;
+            lastLeapY = null;
+            lastLeapZ = null;
         }
 
-        camera.position.x += ( x - lastLeapX );
-        camera.position.y += ( y - lastLeapY );
-        camera.position.z += ( z - lastLeapZ );
-
-        lastLeapX = x;
-        lastLeapY = y;
-        lastLeapZ = z;
-
-        renderer.render( scene, camera );
+        if ( frame.gestures[0] )
+        {
+            var gesture = frame.gestures[0];
+            if ( gesture.type == 'circle' )
+            {
+                gotoHome();
+            }
+        }
     }
-    else
-    {
-        lastLeapX = null;
-        lastLeapY = null;
-        lastLeapZ = null;
-    }
+}
+
+function toggleLeapMotion ( element )
+{
+    isLeapEnabled = element.checked;
 }
