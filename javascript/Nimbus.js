@@ -430,9 +430,30 @@ function doLeapMotion( frame )
                 lastLeapZ = z; 
             }
 
-            camera.position.x += ( x - lastLeapX );
-            camera.position.y += ( y - lastLeapY );
-            camera.position.z += ( z - lastLeapZ );
+            var diff_x = x - lastLeapX;
+            var diff_y = y - lastLeapY;
+            var diff_z = z - lastLeapZ;
+            var diff_thresh_x_min = 0.006;
+            var diff_thresh_y_min = 0.006;
+            var diff_thresh_z_min = 0.0085;
+
+            if ( Math.abs( diff_x ) > diff_thresh_x_min) 
+            {
+                camera.position.x += diff_x;
+                //console.log( 'x: ' + Math.abs( diff_x ));
+            }
+
+            if ( Math.abs( diff_y ) > diff_thresh_y_min)
+            {
+                camera.position.y += diff_y;
+                //console.log( 'y: ' + Math.abs( diff_y ));
+            }
+
+            if ( Math.abs( diff_z ) > diff_thresh_z_min)
+            {
+                camera.position.z += diff_z;
+                //console.log( 'z: ' + Math.abs( diff_z ));
+            }
 
             lastLeapX = x;
             lastLeapY = y;
